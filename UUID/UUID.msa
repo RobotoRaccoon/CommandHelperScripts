@@ -1,0 +1,21 @@
+#########################
+#                       #
+# THIS IS A MASTER FILE #
+#  ~/minecraft/master   #
+#                       #
+#########################
+
+### CodebotoCodecoon
+
+*:/uuid [$p] [$] = >>>
+    if( $p == '' ) {
+        @UUID = puuid()
+    } else {
+        @player = _autocomplete_player($p, false, true)
+        @UUID = _UUID_player_get(@player, true)
+    }
+
+    @AssociatedUsernames = _UUID_usernames_list(@UUID)
+    msg(colorize("&eUUID: &6@UUID"))
+    msg(colorize("&eKnown usernames: &6". array_implode(@AssociatedUsernames, '&e, &6')))
+<<<
