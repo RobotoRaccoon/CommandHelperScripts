@@ -18,7 +18,7 @@ proc _UUID_unaltered(@UUID) {
 }
 
 ### Get the last seen UUID of a player.
-proc _UUID_player_get(@player=player(), @die=true) {
+proc _UUID_player_get(@player=player(), @die=false) {
     @player = to_lower(@player);
     @UUID = _import_get("uuid.player.@player");
 
@@ -38,7 +38,7 @@ proc _UUID_player_set(@player, @UUID) {
 }
 
 ### Get all usernames associated with a UUID.
-proc _UUID_usernames_list(@UUID, @die=true) {
+proc _UUID_usernames_list(@UUID, @die=false) {
     @alteredUUID = _UUID_altered(@UUID);
     @nameList = get_value('uuid.usernames', @alteredUUID);
     
