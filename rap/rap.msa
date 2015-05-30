@@ -1,0 +1,193 @@
+#########################
+#                       #
+# THIS IS A MASTER FILE #
+#  ~/minecraft/master   #
+#                       #
+#########################
+
+### CodebotoCodecoon
+
+*:/clearrap [$p] [$s] [$c] [$] = >>>
+    _verify_op();
+
+    if( $ == '' ) {
+        _error('/clearrap <player> <section> <id> <reason>');
+    }
+
+    @player = _autocomplete_player($p);
+    @section = _RAP_section_check($s);
+    @count = $c;
+    @reason = $;
+
+    @UUID = _UUID_player_get(@player, true);
+    _RAP_entry_clear(@UUID, @section, @count, @reason);
+<<<
+
+*:/rap [$p] = >>>
+    _verify_janitor();
+    _RAP_print_player($p);
+    msg(colorize("&cView old rap with &4/oldrap ". $p));
+<<<
+
+*:/uuidrap [$id] = >>>
+    _verify_janitor();
+    _RAP_print_UUID($id);
+<<<
+
+*:/oldrap [$p] = >>>
+    _verify_janitor();
+    _userhist($p) ### In bansystem/auto_includes.ms
+<<<
+
+*:/kick [$p] [$] = >>>
+    _verify_janitor();
+    
+    if( $p == '' ) {
+        _error('/kick &4<player> <reason>');
+    }
+    if( $ == '') {
+        _error('/kick <player> &4<reason>');
+    }
+
+    @p = _autocomplete_player($p, true);
+
+    ### Allow console to kick all. Disallow Staff from kicking Staff/Ops.
+    if(player() != '~console') {
+        ### Checks for Janitors - Cannot kick other staff.
+        if(!has_permission('ch_staff')) {
+            if(has_permission(@p, 'ch_janitor')) {
+                _error('You cannot fondle another staff.');
+            }
+        }
+
+        ### Does not let anyone but ops kick staff.
+        if(!has_permission('ch_op')) {
+            if(has_permission(@p, 'ch_staff')) {
+                _error('You cannot fondle another staff.');
+            }
+        }
+    }
+
+    @info = _RAP_info_generate($, time(), player());
+    _RAP_kick(@p, @info);
+<<<
+
+### Broken with 1.8
+#*:/superkick [$p] [$] = >>>
+#    _verify_staff();
+#
+#    if( $p == '' ) {
+#        _error('/superkick &4<player> <reason>');
+#    }
+#
+#    @player = _autocomplete_player($p, true);
+#    set_pmode(@player, SURVIVAL);
+#    set_peffect(@player, 1, 100000000, 1);
+#    set_pvelocity(@player, 3,3,3);
+#    broadcast(colorize("&4@player &ehas been ".
+#                '&4&oS&6&oU&e&oP&a&oE&9&oR &5&oK&d&oI&4&oC&6&oK&e&oE&a&oD'.
+#                ' &efor &5"'. $. '" &eby &4'. player()))
+#    
+#    _bc_irc("@player has been SUPER KICKED by ". player(). ' for "'. $. '"')
+#
+#    set_timeout(5000, closure(;
+#        set_peffect(@player, 1, 0, 1);
+#    ));
+#<<<
+
+*:/tempmute [$p] [$l] [$] = >>>
+    _verify_janitor();
+    
+    if( $p == '' ) {
+        _error('/tempmute &4<player> <length> <reason>');
+    }
+    if( $l == '' ) {
+        _error('/tempmute <player> &4<length> <reason>');
+    }
+    if( $ == '' ) {
+        _error('/tempmute <player> <length> &4<reason>');
+    }
+
+    @p = _autocomplete_player($p);
+    @info = _RAP_info_generate($, time(), player(), $l);
+    _RAP_mute(@p, @info);
+<<<
+
+*:/mute [$p] [$] = >>>
+    _verify_janitor();
+        
+    if( $p == '' ) {
+        _error('/mute &4<player> <reason>');
+    }
+    if( $ == '') {
+        _error('/mute <player> &4<reason>');
+    }
+    if( is_numeric($[0]) ) {
+        _error('Did you mean /tempmute ?');
+    }
+
+    @p = _autocomplete_player($p);
+    @info = _RAP_info_generate($, time(), player(), 'Forever');
+    _RAP_mute(@p, @info);
+<<<
+
+*:/unmute [$p] [$] = >>>
+    _verify_janitor();
+    if( $p == '' ) {
+        _error('/unmute <player>');
+    }
+    @p = _autocomplete_player($p);
+    sudo("/emute @p 1s");
+<<<
+
+*:/tempban [$p] [$l] [$] = >>>
+    _verify_staff();
+    
+    if( $p == '' ) {
+        _error('/tempban &4<player> <length> <reason>');
+    }
+    if( $l == '' ) {
+        _error('/tempban <player> &4<length> <reason>');
+    }
+    if( $ == '' ) {
+        _error('/tempban <player> <length> &4<reason>');
+    }
+    
+    @p = _autocomplete_player($p);
+    @info = _RAP_info_generate($, time(), player(), $l);
+    _RAP_ban(@p, @info);
+<<<
+
+*:/ban [$p] [$] = >>>
+    _verify_staff();
+        
+    if( $p == '' ) {
+        _error('/ban &4<player> <reason>');
+    }
+    if( $ == '') {
+        _error('/ban <player> &4<reason>');
+    }
+    if( is_numeric($r[0]) ) {
+        _error('Did you mean /tempban ?');
+    }
+
+    @p = _autocomplete_player($p);
+    @info = _RAP_info_generate($, time(), player(), 'Forever');
+    _RAP_ban(@p, @info);
+<<<
+
+*:/addcomment [$p] [$] = call_alias(/comment $p $);
+*:/comment [$p] [$] = >>>
+    _verify_janitor();
+        
+    if( $p == '' ) {
+        _error('/comment &4<player> <comment>');
+    }
+    if( $ == '' ) {
+        _error('/comment <player> &4<comment>');
+    }
+
+    @p = _autocomplete_player($p);
+    @info = _RAP_info_generate($, time(), player());
+    _RAP_comment(@p, @info);
+<<<

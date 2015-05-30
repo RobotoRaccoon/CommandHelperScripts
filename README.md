@@ -8,6 +8,9 @@ This is a localised UUID tracking system to allow the quick retrieval of players
 #### Book
 A simple script whipped up in about an hour to allow the saving of book metadata. Books are saved under unique IDs, unrelated to the book's title. Books may also be assigned to be given out when a player joins the server for the first time.
 
+#### Rap
+RAP sheets for players, listing all of their offences. Follows their UUID rather than their username. Does not currently track jails, but that's not difficult to implement if you feel the need.
+
 #### Shops
 Creates a system for purchasing shop teleports, not actual shops. To be used in conjunction with a plugin like SignShop or ChestShop. Shops require a daily fee to operate, defaulting to $25/day.
 
