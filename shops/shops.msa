@@ -1,0 +1,145 @@
+#########################
+#                       #
+# THIS IS A MASTER FILE #
+#  ~/minecraft/master   #
+#                       #
+#########################
+
+### CodebotoCodecoon
+
+### A system to allow the purchasing of shop teleports.
+### These "shops" can be put into categories depending on what their owner deems they are selling.
+### Shops go on a pay-per-day basis, currently set to $25/day at the time of writing this.
+
+*:/shop [$p1] [$p2] [$p3] [$p4] = >>>
+    @p1 = to_lower($p1);
+    @p2 = to_lower($p2);
+    @p3 = to_lower($p3);
+    @p4 = to_lower($p4);
+
+    include('shopsProcs.ms');
+    switch(@p1) {
+        case '':
+        case 'help':
+            _shops_help(@p2);
+
+        case 'about':
+            @cost = _shops_purchase();
+            @upkeep = _shops_perday();
+            @cats = _shops_cat_list();
+
+            msg(colorize(" &7===== &5About Shops &7====="));
+            msg(colorize("&eShops &6is a CommandHelper script written by &5RobotoRaccoon&6. n&7To purchase a shop, it costs &e$@cost&7, to keep a shop running is &e$@upkeep &7per day. Upon purchase, every user is given &e7 days &7of free upkeep. Add more funds to a shop with the &e/Shop Edit &7command. Shops also feature a range of toggleable categories which can be viewed more easily by using &e/Shop List <Category>&7. Available categories include: &e@cats&7."));
+        
+        case 'tp':
+        case 'teleport':
+        case 'warp':
+            _no_console();
+            if( @p2 == '' ) {
+                _error("/shop @p1 <number | random>");
+            }
+            _shops_teleport(@p2);
+        
+        case 'info':
+            if( @p2 == '' ) {
+                _error("/shop @p1 <number>");
+            }
+            _shops_print_info(@p2);
+        
+        case 'like':
+            _no_console();
+            if( @p2 == '' ) {
+                _error("/shop @p1 <number>");
+            }
+            _shops_likes_toggle(@p2, _UUID_player_get(player()));
+        
+        case 'buy':
+        case 'purchase':
+            _no_console();
+            _verify_user('Sorry, you have to be a at least a [1] to buy a shop.');
+            if( @p2 == '' ) {
+                msg(colorize("&6Purchase a shop: &e&l$". _shops_purchase()));
+                msg(colorize("&6Upkeep a shop: &e&l$". _shops_perday(). "/day"));
+                _error("/shop @p1 <number>");
+            }
+            _shops_buy(@p2);
+        
+        case 'remove':
+        case 'delete':
+        case 'del':
+            if( @p2 == '' ) {
+                _error("/shop @p1 <number>");
+            }
+            _shops_remove(@p2);
+        
+        case 'all':
+            _shops_likes_descending(@p2);
+       
+        case 'list':
+        case 'ls':
+            if( @p2 == '' ) {
+                _error('/shop list <category | all>');
+            }
+            else if( @p2 == 'all' ) {
+                ### All shops
+                @list = array_keys(get_values('shops.info.'));
+                _shops_paginate('All shops', @list, true);
+            }
+            else {
+                ### Specific category
+                @list = _shops_cat_get(@p2);
+                _shops_paginate(@p2, @list);
+            }
+        
+        case 'edit':
+        case 'modify':
+            if( @p2 == '' ) {
+                _error("/shop @p1 <number>");
+            }
+    
+            @info = _shops_get_info(@p2);
+            if( _UUID_player_get(player()) != @info['owner'] ) {    
+                _verify_staff('You do not own this shop.') ;
+            }
+   
+            switch(@p3) {
+                case '':
+                case 'help':
+                    msg(colorize(" &7===== &5/Shop @p1 @p2 &7====="));
+                    msg(colorize("&5Cat &f> &dToggle categories for your shop."));
+                    msg(colorize("&5Pay &f> &dAdd more money into your account."));
+                    msg(colorize("&5TP &f> &dSet the teleport location."));
+                
+                case 'cat':
+                case 'category':
+                    if( @p4 == '' ) {
+                        _error("/shop @p1 @p2 @p3 <category>. Available categories:n". _shops_cat_list());
+                    }
+                    _shops_cat_toggle(@p2, @p4);
+                
+                case 'pay':
+                    _no_console();
+                    if( @p4 == '' ) {
+                        _error("/shop @p1 @p2 @p3 <amount>");
+                    }
+                    _shops_addbalance(@p2, @p4);
+                
+                case 'tp':
+                case 'teleport':
+                case 'warp':
+                    _no_console();
+                    _teleport_bannedblocks(ploc());
+                    @info['ploc'] = ploc();
+                    _shops_store_info(@p2, @info);
+                    msg(colorize("&6Updated the teleport location for &eShop @{p2}&6..."));
+            }
+
+        default:
+            if( is_integral(@p1) ) {
+                _no_console();
+                _shops_teleport(@p1);
+            } else {
+                _error('/shop help');
+            }
+    }
+<<<
