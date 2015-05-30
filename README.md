@@ -8,6 +8,9 @@ This is a localised UUID tracking system to allow the quick retrieval of players
 #### Book
 A simple script whipped up in about an hour to allow the saving of book metadata. Books are saved under unique IDs, unrelated to the book's title. Books may also be assigned to be given out when a player joins the server for the first time.
 
+#### Connect4
+A recreation of four-in-a-row inside Minecraft. Configuration for this is not the best, some areas could still be improved if I could be bothered.
+
 #### Rap
 RAP sheets for players, listing all of their offences. Follows their UUID rather than their username. Does not currently track jails, but that's not difficult to implement if you feel the need.
 

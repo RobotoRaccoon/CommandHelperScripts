@@ -1,0 +1,61 @@
+#########################
+#                       #
+# THIS IS A MASTER FILE #
+#  ~/minecraft/master   #
+#                       #
+#########################
+
+### Connect 4 lyfe ###
+
+        ### TODO:
+        # Perhaps not use commandsigns and instead use a player_block_interact, or whatever it is called.
+        # ^ Will have to set coordinates of podiums, where keystones are mirrored, starting from lowest x/z value.
+        # Add time of last move?
+        # ^ Will allow for opponent to click their keystones, and after say 120 seconds automatically end the game.
+        # ^ Add warning messages to opponent, somehow, without relying on a timer.
+
+### CodebotoCodecoon
+*:/connect4 [$p1] [$p2] = >>>
+
+    include('includes.ms')
+
+    @p1 = to_lower($p1)
+    @p2 = to_lower($p2)
+
+    switch(@p1) {
+        case '':
+        case 'help':
+            _C4_help(@p2)
+
+        case 'join':
+        case 'enter':
+            _C4_join()
+
+        case 'quit':
+        case 'leave':
+            _C4_quit() 
+            
+        case 'play':
+            _C4_play(@p2)
+
+        case 'stats':
+        case 'statistics':
+            if(@p2 == '') {
+                _no_console('/connect4 stats <player>')
+                @user = player()
+            } else {
+                @user = _autocomplete_player(@p2)
+            }
+   
+            _C4_printStats(@user)
+
+        case 'reset':
+            _verify_staff()
+            _C4_reset()
+            msg(colorize('&cYou have forcefully ended the current round of &4Connect 4&c.'))
+
+        default:
+            _error('/connect4 help')
+    }
+<<<
+
