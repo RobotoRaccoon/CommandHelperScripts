@@ -290,7 +290,7 @@ proc _shops_cat_list() {
 ### Check if supplied category is valid.
 proc _shops_cat_check(@cat) {
     if( !array_contains_ic( _shops_cat_list(), @cat ) ) {
-        _error("'@category' is not a valid category in: ". _shops_cat_list());
+        _error("'@cat' is not a valid category in: ". _shops_cat_list());
     }
 }
 
