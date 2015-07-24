@@ -32,7 +32,7 @@ proc _UUID_player_get(@player=player(), @die=false) {
 ### Set the last seen UUID for a username
 proc _UUID_player_set(@player, @UUID) {
     @player = to_lower(@player);
-    if( _UUID_player_get(@player) != @UUID ) {
+    if( _UUID_player_get(@player, false) != @UUID ) {
         _export_store("uuid.player.@player", @UUID);
     }
 }
@@ -57,7 +57,7 @@ proc _UUID_usernames_add(@UUID, @player) {
         @nameList = array();
     }
 
-    if( !array_contains_ic(@nameList, @player) ) {
+    if( !array_contains(@nameList, @player) ) {
         array_push(@nameList, @player);
         store_value("uuid.usernames.@alteredUUID", @nameList);
     }
@@ -77,8 +77,8 @@ proc _UUID_usernames_add(@UUID, @player) {
 
 ### Get the last username used by a specific UUID.
 proc _UUID_usernames_lastname(@UUID) {
-    @nameList = _UUID_usernames_list(@UUID);
-    return( @nameList[array_size(@nameList) - 1] );
+    @nameList = _UUID_usernames_list(@UUID, false);
+        return( @nameList[array_size(@nameList) - 1] );
 }
 
 ### Get all other usernames by supplying a username.
