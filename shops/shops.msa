@@ -29,7 +29,7 @@
             @cats = _shops_cat_list();
 
             msg(colorize(" &7===== &5About Shops &7====="));
-            msg(colorize("&eShops &6is a CommandHelper script written by &5RobotoRaccoon&6. n&7To purchase a shop, it costs &e$@cost&7, to keep a shop running is &e$@upkeep &7per day. Upon purchase, every user is given &e7 days &7of free upkeep. Add more funds to a shop with the &e/Shop Edit &7command. Shops also feature a range of toggleable categories which can be viewed more easily by using &e/Shop List <Category>&7. Available categories include: &e@cats&7."));
+            msg(colorize("&eShops &6is a CommandHelper script written by &5RobotoRaccoon&6. \n&7To purchase a shop, it costs &e$@cost&7, to keep a shop running is &e$@upkeep &7per day. Upon purchase, every user is given &e7 days &7of free upkeep. Add more funds to a shop with the &e/Shop Edit &7command. Shops also feature a range of toggleable categories which can be viewed more easily by using &e/Shop List <Category>&7. Available categories include: &e@cats&7."));
         
         case 'tp':
         case 'teleport':

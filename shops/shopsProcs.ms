@@ -7,9 +7,6 @@
 
 ### CodebotoCodecoon
 
-### TODO
-# Done.
-
 ### The help command.
 proc _shops_help(@page=1, @player=player()) {
     
@@ -76,6 +73,10 @@ proc _shops_buy(@shop) {
     foreach( _shops_cat_list(), @cat ) {
         _shops_cat_off(@shop, @cat, true);
     }
+
+    ### Clear TP history, for reason above.
+    _shops_tphistory_clear(@shop);
+
     ### Take away their cash, and set up their shop.
     @UUID = _UUID_player_get(player());
     @info = _shops_generate_info(@UUID, ploc(), @freepay, time());
@@ -115,13 +116,13 @@ proc _shops_remove(@shop, @silent=false, @force=false) {
     @info = _shops_get_info(@shop);
 
     ### Only allow the owner or staff to remove shops.
-    if( _UUID_player_get(player()) != @info['owner'] ) {
+    if( _UUID_player_get(player()) != @info['owner'] && !@force ) {
         _verify_staff('You do not own this shop.');
     }
 
     ### Fail-safe
     if( !import("shops.failsafe.@shop") && !@force ) {
-        msg(colorize("&4Warning: &cYou are about to remove &4shop @shop&c.nTo remove the shop, run the same command again."));
+        msg(colorize("&4Warning: &cYou are about to remove &4shop @shop&c.\nTo remove the shop, run the same command again."));
         export("shops.failsafe.@shop", true);
         die();
     }
@@ -131,6 +132,7 @@ proc _shops_remove(@shop, @silent=false, @force=false) {
         _shops_cat_off(@shop, @cat, true);
     }
     clear_value("shops.info.@shop");
+    export("shops.info.@shop", null);
     export("shops.failsafe.@shop", null);
 
     if( !@silent ) {
@@ -146,7 +148,9 @@ proc _shops_remove(@shop, @silent=false, @force=false) {
 proc _shops_teleport(@shop, @silent=false) {
    
     ### Get a random shop if required
+    @random = false;
     if( to_lower(@shop) == 'random' ) {
+        @random = true;
         @list = array_keys(get_values('shops.info.'));
         for(@i = 0, @i < 5, @i++) {
             @shop = split('.', @list[array_rand(@list)[0]])[2];
@@ -166,6 +170,8 @@ proc _shops_teleport(@shop, @silent=false) {
     sudo("/tpo @self"); ### Force an essentials /back position.
     set_ploc(@self, @info['ploc']);
     pfacing(@info['ploc']['yaw'], @info['ploc']['pitch']);
+
+    _shops_tphistory_add(@shop, _UUID_player_get(@self), @random);
 
     if( !@silent ) {
         @owner = _UUID_usernames_lastname(@info['owner']);
@@ -259,14 +265,17 @@ proc _shops_print_info(@shop) {
 
     ### Categories which this shop is a part of.
     @cats = array();
-    foreach( _shops_cat_list(), @cat ) {
+    foreach(@cat in _shops_cat_list()) {
         if( array_contains_ic( _shops_cat_get(@cat), @shop) ) {
-            array_push(@cats, @cat)   ;
+            @cats[] = @cat;
         }
     }
 
     ### How many likes this shop has.
     @likes = array_size(@info['likes']);
+
+    ### Rating
+    @rating = _shops_rating(@shop, @info);
 
     msg(colorize(" &7===== &5Shop @shop &7====="));
     msg(colorize("&6Owner: &e@owner"));
@@ -274,6 +283,7 @@ proc _shops_print_info(@shop) {
     msg(colorize("&6Status: &e@status"));
     msg(colorize("&6Categories: &e@cats"));
     msg(colorize("&6Likes: &e@likes"));
+    msg(colorize("&6Rating: &e@rating"));
 }
 
 ###            ###
@@ -334,7 +344,7 @@ proc _shops_cat_off(@shop, @category, @silent=false) {
 
 proc _shops_cat_on(@shop, @category, @silent=false) {
     @list = _shops_cat_get(@category);
-    array_push(@list, @shop);
+    @list[] = @shop;
     @lowcat = to_lower(@category);
     store_value("shops.cat.@lowcat", @list);
 
@@ -407,11 +417,17 @@ proc _shops_likes_descending(@page=1) {
     }
 
     #Sort array by getting its number of likes.
+    #@list = array_sort(@shoparray,
+    #    closure(@left,@right){
+    #            return( array_size(_shops_get_info(@left)['likes']) < array_size(_shops_get_info(@right)['likes']));
+    #    }
+    #);
+
     @list = array_sort(@shoparray,
         closure(@left,@right){
-                return( array_size(_shops_get_info(@left)['likes']) < array_size(_shops_get_info(@right)['likes']));
+                return( _shops_rating(@shop, _shops_get_info(@left)) < _shops_rating(@shop, _shops_get_info(@right)));
         }
-    )     ;
+    );
 
     ### Pagination section.
     @perpage = 8;
@@ -420,7 +436,7 @@ proc _shops_likes_descending(@page=1) {
         @page = 1;
     }
 
-    msg(colorize("&6Showing you &eAll shops &6sorted by likes"));
+    msg(colorize("&6Showing you &eAll shops &6sorted by rating"));
     for(@i = 0, @i < @perpage, @i++) {
         try(;
             @shop = @list[@i + @perpage * (@page - 1)];
@@ -471,14 +487,16 @@ proc _shops_printline(@shop) {
 
     @info = _shops_get_info(@shop);
     @owner = _UUID_usernames_lastname(@info['owner']);
-    @likes = array_size(@info['likes']);
+    #@likes = array_size(@info['likes']);
     @active = _shops_active(@shop);
+
+    @rating = _shops_rating(@shop, @info);
 
     ### Display normally, or in red if shop is expired.
     if( @active ) {
-        msg(colorize("&5Shop @shop &dby &5@owner &7&o(Likes: @likes)"));
+        msg(colorize("&5Shop @shop &dby &5@owner &7&o(Rating: @rating)"));
     } else {
-        msg(colorize("&4&mShop @shop &c&mby &4&m@owner&7&o (Likes: @likes)"));
+        msg(colorize("&4&mShop @shop &c&mby &4&m@owner&7&o (Rating: @rating)"));
     }
 }
 
@@ -487,9 +505,77 @@ proc _shops_expire_alert(@shop) {
     @UUID = _UUID_altered( @info['owner'] );
     
     ### Delete shop outright if less than 5 likes, or expired over 20 days ago
+    x
     if( (array_size(@info['likes']) < 5) || (_shops_daysLeft(@shop) < -20) ) {
         _shops_remove(@shop, true, true);
     } else {
         store_value("shops.expirenotify.@UUID", @shop);
     }
+}
+
+proc _shops_tphistory_add(@shop, @UUID, @random=false) {
+    _shops_tphistory_clearall(); ### Test to see if scores need clearing.
+    if(@random) {
+        return();
+    }
+
+
+    @list = get_value("shops.tphistory.@shop");
+    if(!is_array(@list)) {
+        @list = associative_array();
+    }
+
+    if(array_index_exists(@list, @UUID)) {
+        @list[@UUID] += 1;
+    } else {
+        @list[@UUID] = 1;
+    }
+
+    store_value("shops.tphistory.@shop", @list);
+}
+
+proc _shops_tphistory_clear(@shop) {
+    clear_value("shops.tphistory.@shop");
+}
+
+proc _shops_tphistory_score(@shop) {
+    @list = get_value("shops.tphistory.@shop");
+    @score = 0;
+
+    if(is_array(@list)) {
+        foreach(@UUID: @count in @list) {
+            if(@count > 1) {
+                @score++;
+            }
+        }
+    }
+
+    return(@score);
+}
+
+proc _shops_tphistory_clearall() {
+    @lastClear = get_value("shops.historylastcleared");
+    if(!is_integral(@lastClear)) {
+        @lastClear = 0;
+    }
+
+    @daysSinceLastClear = floor((time() - @lastClear) / 86400000);
+    @dayOfMonth = integer(simple_date('d'));
+
+    if(@dayOfMonth == 1 || (@dayOfMonth < 10 && @daysSinceLastClear > 31)) {
+        store_value("shops.historylastcleared", time());
+        foreach(@key in array_keys(get_values("shops.tphistory."))) {
+            clear_value(@key);
+        }
+    }
+
+}
+
+proc _shops_rating(@shop, @info) {
+    @likes = array_size(@info['likes']);
+    @TPScore = _shops_tphistory_score(@shop);
+    @daysSincePurchase = floor((time() - @info['time']) / 86400000);
+
+    @rating = floor(***This information is hidden***);
+    return(@rating);
 }
