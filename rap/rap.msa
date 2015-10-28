@@ -72,28 +72,28 @@
     _RAP_kick(@p, @info);
 <<<
 
-### Broken with 1.8
-#*:/superkick [$p] [$] = >>>
-#    _verify_staff();
-#
-#    if( $p == '' ) {
-#        _error('/superkick &4<player> <reason>');
-#    }
-#
-#    @player = _autocomplete_player($p, true);
-#    set_pmode(@player, SURVIVAL);
-#    set_peffect(@player, 1, 100000000, 1);
-#    set_pvelocity(@player, 3,3,3);
-#    broadcast(colorize("&4@player &ehas been ".
-#                '&4&oS&6&oU&e&oP&a&oE&9&oR &5&oK&d&oI&4&oC&6&oK&e&oE&a&oD'.
-#                ' &efor &5"'. $. '" &eby &4'. player()))
-#    
-#    _bc_irc("@player has been SUPER KICKED by ". player(). ' for "'. $. '"')
-#
-#    set_timeout(5000, closure(;
-#        set_peffect(@player, 1, 0, 1);
-#    ));
-#<<<
+*:/superkick [$p] [$] = >>>
+    _verify_staff();
+
+    if( $p == '' ) {
+        _error('/superkick &4<player> <reason>');
+    }
+
+    @e = 22;
+
+    @player = _autocomplete_player($p, true);
+    set_pmode(@player, SURVIVAL);
+    set_peffect(@player, @e, 100000000, 5);
+    broadcast(colorize("&4@player &ehas been ".
+                '&4&oS&6&oU&e&oP&a&oE&9&oR &5&oK&d&oI&4&oC&6&oK&e&oE&a&oD'.
+                ' &efor &5"'. $. '" &eby &4'. player()));
+    
+    _bc_irc("@player has been SUPER KICKED by ". player(). ' for "'. $. '"');
+
+    set_timeout(5000, closure(
+        set_peffect(@player, @e, 0, 1);
+    ));
+<<<
 
 *:/tempmute [$p] [$l] [$] = >>>
     _verify_janitor();
