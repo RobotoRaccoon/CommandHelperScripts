@@ -29,6 +29,11 @@ proc _UUID_player_get(@player=player(), @die=false) {
     return(@UUID);
 }
 
+### Just like player_get, but also calls altered straight away.
+proc _UUID_player_altered(@player=player()) {
+    return( _UUID_altered( _UUID_player_get(@player) ) );
+}
+
 ### Set the last seen UUID for a username
 proc _UUID_player_set(@player, @UUID) {
     @player = to_lower(@player);
@@ -78,7 +83,11 @@ proc _UUID_usernames_add(@UUID, @player) {
 ### Get the last username used by a specific UUID.
 proc _UUID_usernames_lastname(@UUID) {
     @nameList = _UUID_usernames_list(@UUID, false);
-        return( @nameList[array_size(@nameList) - 1] );
+    if(is_array(@nameList) && array_size(@nameList) != 0) {
+        return(@nameList[array_size(@nameList) - 1]);
+    }
+    
+    return(@UUID);
 }
 
 ### Get all other usernames by supplying a username.
