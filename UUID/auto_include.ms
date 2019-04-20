@@ -62,10 +62,9 @@ proc _UUID_usernames_add(@UUID, @player) {
         @nameList = array();
     }
 
-    if( !array_contains(@nameList, @player) ) {
-        array_push(@nameList, @player);
-        store_value("uuid.usernames.@alteredUUID", @nameList);
-    }
+    array_remove_values(@nameList, @player);
+    array_push(@nameList, @player);
+    store_value("uuid.usernames.@alteredUUID", @nameList);
 }
 
 ### Completely re-write the usernames list. Use with caution. ie, not in anything but /onlineuuid

@@ -22,11 +22,11 @@ bind(player_join, null, null, @event,
         die();
     }
     
-    if( !array_contains(@nameList, @player) ) {
+    if( _UUID_usernames_lastname(@UUID) != @player ) {
         @nameList[] = @player;
-        _bc_janitor("&4Warning: &cUUID match found other usernames for &4@UUID");
+        _bc_janitor("&4Warning: &cName change detected for &4@UUID");
         _bc_janitor('&cUsernames: &6'. array_implode(@nameList, '&7, &6'));
-        console(colorize("&4Warning: &cUUID match found other usernames for &4@UUID &c| Usernames: &6". array_implode(@nameList, '&7, &6')));
+        #console(colorize("&4Warning: &cUUID match found other usernames for &4@UUID &c| Usernames: &6". array_implode(@nameList, '&7, &6')));
         
         _UUID_usernames_add(@UUID, @player);
     }
