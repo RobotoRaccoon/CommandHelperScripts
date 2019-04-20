@@ -18,7 +18,9 @@ RAP sheets for players, listing all of their offences. Follows their UUID rather
 Creates a system for purchasing shop teleports, not actual shops. To be used in conjunction with a plugin like SignShop or ChestShop. Shops require a daily fee to operate, defaulting to $25/day.
 
 ## Misc. Functions
+These may come one day, but for now they're just stubbed
 * **_error**: Calls a die() and displays a red error message to the user.
 * **_no_console**: Cannot be run from console.
 * **_verify_staff**: Calls an error if the player is not a staff rank.
 * **_DailyCD**: A system for a daily cooldown.
+* **_page_vertical**: Display an array of strings paginated over new lines, over multiple pages if necessary.

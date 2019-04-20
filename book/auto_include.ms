@@ -14,7 +14,6 @@ proc _book_help(@page=1, @player=player()) {
     
     ### All commands go here if they are to show up in the help command.
     @commands = array(
-#            '&5Help &f> &dShows the plugin\'s commands',
             '&5List &f> &dDisplays available books',
             '&5Get &f> &dGet a book to read'
         )
@@ -29,23 +28,7 @@ proc _book_help(@page=1, @player=player()) {
             ))
     }
 
-    ### Find the maximum amount of pages and ensure that the page selected is within the bounds, else set it to 1.
-    @perpage = 5
-    @maxpage = ceil( array_size(@commands) / @perpage )
-    if( !is_numeric(@page) || @page < 1 || @page > @maxpage )  {
-        @page = 1
-    }
-
-    ### Prints all the @commands from the selected page. The try() is in case there are not 5 on that page.
-    tmsg(@player, colorize(' &7===== &5Options &7====='))
-    for(@i = 0, @i < @perpage, @i++) {
-        try(
-            tmsg(@player, colorize(@commands[@i + @perpage * (@page - 1)]) )
-           )
-    }
-    if( @maxpage > 1 ) {
-        tmsg(@player, colorize("&6Page &e@{page}/@{maxpage}&6. View more with &e/book help <page>"))
-    }
+    _page_vertical('Options', 'book help', @commands, @page, 5, @player);
 }
 
 proc _book_get(@id, @player=player()) {
@@ -64,7 +47,7 @@ proc _book_get(@id, @player=player()) {
     _DailyCD_update("book.@id", @UUID)
 
     @meta = get_value("CHBook.meta.@id")
-    pgive_item(387, 1, @meta)
+    pgive_item(array(name:'WRITTEN_BOOK', meta:@meta))
     tmsg(@player, colorize("&6Enjoy your new book!"))
 }
 
@@ -162,6 +145,18 @@ proc _book_firstJoin(@id) {
     store_value("CHBook.firstjoin", @list)
 }
 
+#proc _book_implode(@id) {
+#    _verify_op()
+#
+#    ### Ensure the book DOES exist, or error if no ID is supplied.
+#    if( !_book_exists(@id) ) {
+#        _error('A book under this ID cannot be found. Try /book list')
+#    }
+#
+#    @meta = get_value("CHBook.meta.@id")
+#    msg(strip_colors(@meta))
+#}
+
 ###                 ###
 ### Other functions ###
 ###                 ###
@@ -191,10 +186,10 @@ proc _book_exists(@id, @die=false) {
 
 ### Is player holding a written book?
 proc _book_isHolding(@die=false) {
-    try(if( pinv(player(), null)['type'] == 387 ) {
+    try(if( pinv(player(), null)['name'] == 'WRITTEN_BOOK' ) {
         return(true)
     })
-    if( @die ) {
+    if(@die) {
         _error('You are not holding a written book!')
     }
     return(false)
