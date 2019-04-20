@@ -171,7 +171,7 @@ proc _RAP_print_section(@UUID, @section) {
 
     if( @count > 0 ) {
         @secTitle = to_upper(@section). 'S';
-        msg(colorize("&4--------[ @secTitle ]--------"));
+        msg(colorize("&4--------[ &c@secTitle &4]--------"));
         for( @i = 1, @i <= @count, @i++ ) {
             msg( _RAP_entry_format(@UUID, @section, @i) );
         }
