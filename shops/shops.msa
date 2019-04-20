@@ -71,9 +71,22 @@
                 _error("/shop @p1 <number>");
             }
             _shops_remove(@p2);
+
+        case 'killnetherlocs':
+            _verify_op();
+            msg("Removing shop teleports in the Nether");
+            foreach( @shop in _shops_getShops() ) {
+                @info = _shops_get_info(@shop);
+                @ploc = @info['ploc'];
+                if( @ploc == null || @ploc['world'] == 'world_nether' ) {
+                    @info['ploc'] = null;
+                    _shops_store_info(@shop, @info);
+                    msg("Going to remove teleport for shop @shop, as it's in the nether");
+                }
+            }
         
         case 'all':
-            _shops_likes_descending(@p2);
+            _shops_rating_descending(@p2);
        
         case 'list':
         case 'ls':
@@ -113,7 +126,7 @@
                 case 'cat':
                 case 'category':
                     if( @p4 == '' ) {
-                        _error("/shop @p1 @p2 @p3 <category>. Available categories:n". _shops_cat_list());
+                        _error("/shop @p1 @p2 @p3 <category>. Available categories:\n". _shops_cat_list());
                     }
                     _shops_cat_toggle(@p2, @p4);
                 
@@ -132,7 +145,19 @@
                     @info['ploc'] = ploc();
                     _shops_store_info(@p2, @info);
                     msg(colorize("&6Updated the teleport location for &eShop @{p2}&6..."));
+
+                case 'setowner':
+                    if( @p4 == '' ) {
+                        _error("/shop @p1 @p2 @p3 <newPlayer>");
+                    }
+                    @newOwner = _autocomplete_player(@p4);
+                    @info['owner'] = _UUID_player_get(@newOwner);
+                    _shops_store_info(@p2, @info);
+                    msg(colorize("&6Set the new owner for &eShop @p2 &6to &e@newOwner"));
             }
+
+        case 'resetall':
+            _shops_remove_all();
 
         default:
             if( is_integral(@p1) ) {

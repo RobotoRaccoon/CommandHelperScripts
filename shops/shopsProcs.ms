@@ -12,33 +12,19 @@ proc _shops_help(@page=1, @player=player()) {
     
     ### All commands go here if they are to show up in the help command.
     @commands = array(
-            '&5Help &f> &dShows all available commands.',
-            '&5About &f> &dUseful information.',
-            '&5All &f> &dShow all shops, sorted by likes.',
-            '&5List &f> &dList random shops from categories.',
-            '&5TP &f> &dTeleport to a shop number.',
-            '&5Info &f> &dShow all information about a shop.',
-            '&5Like &f> &dGive a shop some reputation.',
-            '&5Buy &f> &dBuy a shop teleport.',
-            '&5Edit &f> &dAdjust settings or pay rent.',
-            '&5Remove &f> &dDelete your shop.';
+            #'&5Help &f> &dShows all available commands',
+            '&5About &f> &dUseful information',
+            '&5All &f> &dShow all shops, sorted by rating',
+            '&5List &f> &dList random shops from categories',
+            '&5TP &f> &dTeleport to a shop number',
+            '&5Info &f> &dShow all information about a shop',
+            '&5Like &f> &dGive a shop some reputation',
+            '&5Buy &f> &dBuy a shop teleport',
+            '&5Edit &f> &dAdjust settings or pay rent',
+            '&5Remove &f> &dDelete your shop'
         );
 
-    ### Find the maximum amount of pages and ensure that the page selected is within the bounds, else set it to 1.
-    @perpage = 5;
-    @maxpage = ceil( array_size(@commands) / @perpage );
-    if( !is_numeric(@page) || @page < 1 || @page > @maxpage )  {
-        @page = 1;
-    }
-
-    ### Prints all the @commands from the selected page. The try() is in case there are not 5 on that page.
-    tmsg(@player, colorize(' &7===== &5Options &7====='));
-    for(@i = 0, @i < @perpage, @i++) {
-        try(;
-            tmsg(@player, colorize(@commands[@i + @perpage * (@page - 1)]) );
-           );
-    }
-    tmsg(@player, colorize("&6Page &e@{page}/@{maxpage}&6. View more with &e/shop help <page>"));
+    _page_vertical('Options', 'shop help', @commands, @page, 5, @player);
 }
 
 ###              ###
@@ -138,6 +124,17 @@ proc _shops_remove(@shop, @silent=false, @force=false) {
     if( !@silent ) {
         msg(colorize("&6Successfully removed Shop &e@{shop}&6..."));
     }
+
+    _shops_sortShops();
+}
+
+proc _shops_remove_all() {
+    _verify_op();
+    @vals = array_keys(get_values("shops"));
+    foreach(@val in @vals) {
+        clear_value(@val);
+        msg("Removed @val");
+    }
 }
 
 ###          ###
@@ -150,6 +147,7 @@ proc _shops_teleport(@shop, @silent=false) {
     ### Get a random shop if required
     @random = false;
     if( to_lower(@shop) == 'random' ) {
+	_error('Random teleports disabled for spam');
         @random = true;
         @list = array_keys(get_values('shops.info.'));
         for(@i = 0, @i < 5, @i++) {
@@ -166,10 +164,16 @@ proc _shops_teleport(@shop, @silent=false) {
 
     @self = player();
     @info = _shops_get_info(@shop);
-    _teleport_bannedblocks(@info['ploc']); ### Check that the destination is not a death-trap.
+    @ploc = @info['ploc'];
+
+    if( @ploc == null ) {
+        _error("This shop does not have a location set...");
+    }
+
+    _teleport_bannedblocks(@ploc); ### Check that the destination is not a death-trap.
     sudo("/tpo @self"); ### Force an essentials /back position.
-    set_ploc(@self, @info['ploc']);
-    pfacing(@info['ploc']['yaw'], @info['ploc']['pitch']);
+    set_ploc(@self, @ploc);
+    pfacing(@ploc['yaw'], @ploc['pitch']);
 
     _shops_tphistory_add(@shop, _UUID_player_get(@self), @random);
 
@@ -249,18 +253,21 @@ proc _shops_print_info(@shop) {
     @purchased = simple_date('MMMM dd, yyyy', @info['time']);
 
     ### How many days left on their rent before someone else can claim it.
-    @daysleft = _shops_daysLeft(@shop);
-    if( @daysleft <= 0) {
-        @status = "&cEXPIRED";
-    } else {
-        if( @daysleft >= 1 ) {
-            @days = ceil(@daysleft);
-            @status = "&a@days days left";
-        }
-        else {
-            @hours = ceil(@daysleft*24);
-            @status = "&a@hours hours left";
-        }
+    @daysleft = _shops_daysLeft(@shop); #float
+    @days = abs(ceil(@daysleft));
+    @hours = abs(ceil(@daysleft*24));
+    
+    if( @daysleft <= -2 ) {
+        @status = "&cEXPIRED (@days days ago)";
+    }
+    else if( @daysleft <= 0) {
+        @status = "&cEXPIRED (@hours hours ago)";
+    }
+    else if( @daysleft > 1 ) {
+        @status = "&a@days days left";
+    }
+    else {
+        @status = "&a@hours hours left";
     }
 
     ### Categories which this shop is a part of.
@@ -284,6 +291,19 @@ proc _shops_print_info(@shop) {
     msg(colorize("&6Categories: &e@cats"));
     msg(colorize("&6Likes: &e@likes"));
     msg(colorize("&6Rating: &e@rating"));
+    
+    ### Staff and owner only info
+    if(_UUID_player_get(player()) != @info['owner'] && !has_permission('ch_staff')) {
+        die();
+    }
+
+    ### Coordinates
+    @ploc = @info['ploc'];
+    @coords = 'x:'.floor(@ploc['x']). ' y:'.floor(@ploc['y']). ' z:'.floor(@ploc['z']);
+    
+    msg(colorize(" &7===== &5Owner Only Info &7====="));
+    msg(colorize("&5Location: &d@coords"));
+
 }
 
 ###            ###
@@ -379,55 +399,24 @@ proc _shops_likes_toggle(@shop, @UUID) {
     _shops_store_info(@shop, @info);
 }
 
-### Prints the most likes shops, in page form.
-proc _shops_likes_descending(@page=1) {
-    @list = array_keys(get_values('shops.info.'));
-
-    ### This is the ugliest method. But how do I do it better?
-    # Just want a sorted array of shop numbers to send into pagination func. eg {1, 46, 27, 99, ...}
-
-    ### Generates an array like: {40: {1, 99}, 0:{2, 3, 4}} where the index is the amount of likes.
-#    @sorted = associative_array()
-#    foreach(@shop in @list) {
-#        @shop = split('.', @shop)[2]
-#        @likes = array_size( _shops_get_info(@shop)['likes'] )
-#        
-#        try( @likeslist = @sorted[@likes],
-#             @likeslist = array())
-#
-#        array_push(@likeslist, @shop)
-#        @sorted[@likes] = @likeslist
-#    }
-#
-#    ### Mashes the former array into a single assorted array, descending in likes.
-#    @list = array()
-#    @keys = array_sort(array_keys(@sorted), 'NUMERIC')
-#    array_reverse(@keys)
-#    foreach(@key in @keys) {
-#        @list = array_merge(@list, @sorted[@key])
-#    }
-
-    ### HugglyBuggly fixed the above commented section yay.
-    @shoparray = array();
-
-    #Build array of shopnumbers.
-    foreach (@shop in @list) {
-        @shop = split('.',@shop)[2];
-        array_push(@shoparray,@shop);
+### Re-evaluate the likes list for every player
+proc _shops_likes_refreshLists() {
+    @list = _shops_getSorted();
+    
+    ### Clear all player lists
+    @keys = array_keys(get_values("shops.likes."));
+    foreach(@key in @keys) {
+        clear_value(@key);
     }
 
-    #Sort array by getting its number of likes.
-    #@list = array_sort(@shoparray,
-    #    closure(@left,@right){
-    #            return( array_size(_shops_get_info(@left)['likes']) < array_size(_shops_get_info(@right)['likes']));
-    #    }
-    #);
+    ### To be continued if I still feel like it. This shitty vim and syntax highlighter ruins everything
+}
 
-    @list = array_sort(@shoparray,
-        closure(@left,@right){
-                return( _shops_rating(@shop, _shops_get_info(@left)) < _shops_rating(@shop, _shops_get_info(@right)));
-        }
-    );
+### Prints the highest rated shops, in page form.
+proc _shops_rating_descending(@page=1) {
+
+    ### Sort by rating
+    @list = _shops_getSorted();
 
     ### Pagination section.
     @perpage = 8;
@@ -438,12 +427,62 @@ proc _shops_likes_descending(@page=1) {
 
     msg(colorize("&6Showing you &eAll shops &6sorted by rating"));
     for(@i = 0, @i < @perpage, @i++) {
-        try(;
+        try(
             @shop = @list[@i + @perpage * (@page - 1)];
-            _shops_printline(@shop);
-           );
+            ,
+            break();
+        );
+        _shops_printline(@shop);
     }
     msg(colorize("&6Page &e@{page}/@{maxpage}&6. View more with &e/shop all <page>"));
+}
+
+### Returns a sorted, by rating.
+proc _shops_getSorted() {
+    @sorted = import("shops.sorted");
+
+    ### Update every 30 minutes
+    if(!is_array(@sorted) || (time() - @sorted['time']) > 1800000) {
+        @sorted = _shops_sortShops();
+    }
+
+    return(@sorted['list']);
+}
+
+### Get all the shops, not sorted.
+proc _shops_getShops() {
+    @list = array_keys(get_values('shops.info.'));
+    @shoparray = array();
+
+    #Build array of shopnumbers.
+    foreach(@shop in @list) {
+        @shop = split('.',@shop)[2];
+        @shoparray[] = @shop;
+    }
+
+    return(@shoparray);
+}
+
+proc _shops_sortShops() {
+    _shops_tphistory_clearall(); ### Test if clearing is needed.
+    @shoparray = _shops_getShops();
+
+    #Sort array by getting its number of likes.
+    #@list = array_sort(@shoparray,
+    #    closure(@left,@right){
+    #            return( array_size(_shops_get_info(@left)['likes']) < array_size(_shops_get_info(@right)['likes']));
+    #    }
+    #);
+
+    @list = array_sort(@shoparray,
+        closure(@left,@right) {
+            return( _shops_rating(@left, _shops_get_info(@left)) < _shops_rating(@right, _shops_get_info(@right)));
+        }
+    );
+    
+    @sorted = array(time: time(), list: @list);
+    export("shops.sorted", @sorted);
+    return(@sorted);
 }
 
 ###            ###
@@ -504,22 +543,29 @@ proc _shops_expire_alert(@shop) {
     @info = _shops_get_info(@shop);
     @UUID = _UUID_altered( @info['owner'] );
     
-    ### Delete shop outright if less than 5 likes, or expired over 20 days ago
-    x
-    if( (array_size(@info['likes']) < 5) || (_shops_daysLeft(@shop) < -20) ) {
+    ### Delete shop outright if less than 5 likes and expired more than 2 days ago, or just expired over 20 days ago
+    @likes = array_size(@info['likes']);
+    @days = _shops_daysLeft(@shop);
+    if( (@likes < 5 && @days < -2) || @days < -20 ) {
         _shops_remove(@shop, true, true);
     } else {
         store_value("shops.expirenotify.@UUID", @shop);
     }
 }
 
+###                        ###
+### TP History and Ratings ###
+###                        ###
 proc _shops_tphistory_add(@shop, @UUID, @random=false) {
-    _shops_tphistory_clearall(); ### Test to see if scores need clearing.
     if(@random) {
         return();
     }
 
+    if(@UUID == _shops_get_info(@shop)['owner']) {
+        return();
+    }
 
+    @shop = integer(@shop);
     @list = get_value("shops.tphistory.@shop");
     if(!is_array(@list)) {
         @list = associative_array();
@@ -544,13 +590,17 @@ proc _shops_tphistory_score(@shop) {
 
     if(is_array(@list)) {
         foreach(@UUID: @count in @list) {
-            if(@count > 1) {
-                @score++;
+            @base = 3;
+            if(@count >= @base + 5) {
+                @score += 1;
+            }
+            else if(@count > @base) {
+                @score += 0.2 * (@count - @base);
             }
         }
     }
 
-    return(@score);
+    return(ceil(@score ** 0.5 * 2));
 }
 
 proc _shops_tphistory_clearall() {
@@ -562,7 +612,7 @@ proc _shops_tphistory_clearall() {
     @daysSinceLastClear = floor((time() - @lastClear) / 86400000);
     @dayOfMonth = integer(simple_date('d'));
 
-    if(@dayOfMonth == 1 || (@dayOfMonth < 10 && @daysSinceLastClear > 31)) {
+    if((@dayOfMonth == 1 && @daysSinceLastClear > 1) || @daysSinceLastClear > 31) {
         store_value("shops.historylastcleared", time());
         foreach(@key in array_keys(get_values("shops.tphistory."))) {
             clear_value(@key);

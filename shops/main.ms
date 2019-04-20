@@ -15,7 +15,7 @@ bind(player_join, null, null, @e,
     if( @shop && is_numeric(@shop) && !_shops_active(@shop) ) {
         try(set_timeout(5000, closure(
             tmsg(player(), colorize("&4Notice: &cYour shop &4@shop&c has run out of rent. Please fill it up with the &4/shop edit &ccommand."));
-            play_sound(ploc(), array(sound:NOTE_PIANO), player());
+            play_sound(ploc(), array(sound:'BLOCK_NOTE_BLOCK_HARP'), player());
             clear_value("shops.expirenotify.@UUID");
         )))
     }
