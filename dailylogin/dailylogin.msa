@@ -1,0 +1,57 @@
+#########################
+#                       #
+# THIS IS A MASTER FILE #
+#  ~/minecraft/master   #
+#                       #
+#########################
+
+### CodebotoCodecoon (Created 2018-12-15)
+*:/dailylogin [$p1] [$p2] [$p3] [$] = >>>
+    include('dlProcs.ms');
+
+    @p1 = to_lower($p1);
+    @p2 = to_lower($p2);
+    @p3 = to_lower($p3);
+
+    switch(@p1) {
+    case '':
+    case 'help':
+        msg(colorize(' &7===== &5Daily Login &7====='));
+        msg(colorize('&5Check &f> &dSee how many days [player] has logged in for'));
+        msg(colorize('&5Top &f> &dView the leaderboards'));
+
+    case 'check':
+        if (@p2 == '') {
+            @player = player();
+        } else {
+            @player = _autocomplete_player(@p2);
+        }
+        @UUID = _UUID_player_altered(@player);
+        @days = _dl_checkConsecutive(@UUID);
+        msg(colorize("&e@player &6has logged in for &e@days &6consecutive days"));
+
+    case 'today':
+        @today = _dl_getToday();
+        msg(colorize("&6Today is &e@today &6days since 1970-1-1"));
+
+    case 'top':
+        _dl_cmd_top(@p2);
+
+    case 'update':
+        _verify_op();
+        msg(colorize("&6Checking all online players..."));
+        foreach(@player in all_players()) {
+            _dl_add(@player);
+        }
+
+    case 'set-best':
+        _verify_op();
+        @UUID = _UUID_player_altered(@p2, true);
+        @count = integer(@p3);
+        _dl_updateBest(@UUID, @count);
+
+    default:
+        _error('Unknown command');
+    }
+<<<
+

@@ -11,6 +11,9 @@ A simple script whipped up in about an hour to allow the saving of book metadata
 #### Connect4
 A recreation of four-in-a-row inside Minecraft. Configuration for this is not the best, some areas could still be improved if I could be bothered.
 
+#### Daily Login
+Track consecutive daily logins and give monetary rewards for logging in
+
 #### Minesweeper
 Minesweeper in Minecraft! I really shouldn't have done this using CommandHelper, but here we are. It supports multi-sized arenas, multiple arenas, monetary payouts, leaderboards, and configurable preset modes.
 
