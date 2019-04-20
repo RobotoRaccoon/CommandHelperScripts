@@ -11,6 +11,9 @@ A simple script whipped up in about an hour to allow the saving of book metadata
 #### Connect4
 A recreation of four-in-a-row inside Minecraft. Configuration for this is not the best, some areas could still be improved if I could be bothered.
 
+#### Minesweeper
+Minesweeper in Minecraft! I really shouldn't have done this using CommandHelper, but here we are. It supports multi-sized arenas, multiple arenas, monetary payouts, leaderboards, and configurable preset modes.
+
 #### Rap
 RAP sheets for players, listing all of their offences. Follows their UUID rather than their username. Does not currently track jails, but that's not difficult to implement if you feel the need.
 

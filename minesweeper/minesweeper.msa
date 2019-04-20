@@ -1,0 +1,166 @@
+#########################
+#                       #
+# THIS IS A MASTER FILE #
+#  ~/minecraft/master   #
+#                       #
+#########################
+
+### CodebotoCodecoon ###
+
+### TODO:
+# Try and fix the item_held bind.
+
+*:/mines [$] = >>>
+    if (player() == 'radfme') {
+        _error('Minesweeper is down');
+    }
+
+    include('includes.library/includes.ms');
+    include('includes.library/commands.ms');
+
+    @player = player();
+    @args = split(' ', to_lower($));
+    @cmd = array_remove(@args, 0);
+
+    switch(@cmd) {
+    case '':
+    case 'help':
+        _MS_help(@args);
+
+    case 'start':
+        if(array_size(@args) >= 3) {
+            array_insert(@args, 'custom', 0);
+        }
+        _MS_start(@args);
+
+    case 'quit':
+        if(array_size(@args) > 0) {
+            @player = _autocomplete_player(@args[0], true);
+        }
+        _MS_quit(@player);
+
+    case 'seed':
+        _MS_seed();
+
+    case 'top':
+        _MS_leaderboard_read(@args)
+        
+    case 'personalbest':
+    case 'pb':
+        if(array_size(@args) > 0) {
+            @player = _autocomplete_player(@args[0]);
+        }
+        _MS_personalbest(@player);
+       
+    case 'pack':
+        msg(colorize('&3Download the Minesweeper Resource Pack: &bhttp://bit.ly/2o36csc'));
+
+    default:
+        _error('Unrecognised command. See /mines help');
+    }
+
+    ### Naughty commands ###
+    ### Naughty commands ###
+
+    if(@cmd == 'setscore') {
+        @player = @args[0]
+        @size = @args[1]
+        @time = @args[2]
+        _MS_leaderboard_write(@size, _UUID_player_get(@player), @time);
+        die();
+    }
+
+    if(@cmd == 'rewritepersonalbests') {
+        _verify_op();
+        @all = get_values('minesweeper.leader.player.');
+        @keys = array_keys(@all);
+
+        @cfg = array('small', 'medium', 'large');
+
+        foreach(@keys as @personal){
+            @player = split('.', @personal)[3];
+            @UUID = _UUID_player_get(@player);
+
+            if(is_null(@UUID)) {
+                msg("Ignoring @personal...");
+                continue(); ### Can't import this record, UUID unknown.
+            }
+
+            @times = @all[@personal];
+            @newTimes = associative_array();
+
+            ### Add every existing time, ignoring N/A times.
+            foreach(@key: @size in @cfg) {
+                @time = @times[@key];
+                if(is_numeric(@time)) {
+                    @newTimes[@size] = @time;
+                }
+            }
+
+            @altUUID = _UUID_altered(@UUID);
+            store_value("minesweeper.leader.uuid.@altUUID", @newTimes);
+            clear_value(@personal);
+            msg("Imported @personal to UUID format...");
+        }
+        clear_value('minesweeper.leader.uuid.null');
+        die();
+    }
+
+    if(@cmd == 'leaderboardrewrite') {
+        _verify_op()
+        ### DON'T DO THIS FOR ANY REASON ###
+
+        @cfg = array('small', 'medium', 'large');
+        foreach(@size in @cfg) {
+   
+            @oldSize = to_upper(substr(@size, 0, 1)). substr(@size, 1);
+            clear_value("minesweeper.leader.@oldSize")
+            clear_value("minesweeper.leader.size.@size")
+                
+            @all = get_values('minesweeper.leader.uuid.')
+            @keys = array_keys(@all)
+
+            foreach(@keys as @key) {
+    
+                if(array_index_exists(@all[@key], @size)) {
+                    @time = @all[@key][@size];
+                    @uuid = split('.', @key)[3];
+                    @player = _UUID_usernames_lastname(@uuid);
+
+                    if(@uuid == 'null') {
+                        clear_value(@key);
+                        msg("Cleared value: @key");
+                    } else {
+                        msg("@size -- @player -- @time -- @uuid")
+                        _MS_leaderboard_write(@size, @uuid, @time, true)
+                    }
+                }
+            }
+        }
+
+    }
+
+    if(@cmd == 'clearuseromg' ) {
+        #/mines clearuseromg mcau small 33.98
+        @UUID = _UUID_player_altered(@args[0])
+        @pbs = get_value("minesweeper.leader.uuid.@UUID")
+        if( is_null(@pbs) ) {
+            @pbs = associative_array();
+        }
+
+        @p3 = @args[1]
+        @p4 = @args[2]
+        if( @p3 == 'small' || @p3 == 'medium' || @p3 == 'large' ) {
+            @leader = get_value("minesweeper.leader.size.@p3");
+            array_remove_values(@leader, array(@args[0], @p4));
+            store_value("minesweeper.leader.size.@p3", @leader);
+            array_remove(@pbs, @p3);
+        } else {
+            die("Failed...")
+        }
+
+        store_value("minesweeper.leader.uuid.@UUID", @pbs)
+        msg('Cleared something...')
+    }
+<<<
+
