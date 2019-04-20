@@ -20,6 +20,9 @@ RAP sheets for players, listing all of their offences. Follows their UUID rather
 #### Shops
 Creates a system for purchasing shop teleports, not actual shops. To be used in conjunction with a plugin like SignShop or ChestShop. Shops require a daily fee to operate, defaulting to $25/day.
 
+#### Staff Kit
+Quick and easy script to save and load complete loadouts, including the armor slots.
+
 ## Misc. Functions
 These may come one day, but for now they're just stubbed
 * **_error**: Calls a die() and displays a red error message to the user.

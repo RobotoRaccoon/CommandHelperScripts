@@ -1,0 +1,53 @@
+#########################
+#                       #
+# THIS IS A MASTER FILE #
+#  ~/minecraft/master   #
+#                       #
+#########################
+
+### CodebotoCodecoon
+*:/sk [$] = call_alias("/staffkit" $);
+*:/staffkit [$] = >>>
+    _verify_staff();
+    @args = split(' ', $ );
+    @command = array_remove(@args, 0);
+
+    include('staffkitProcs.ms');
+    switch(to_lower(@command)) {
+        case '':
+        case 'help':
+            _staffkit_help(@args);
+
+        case 'list':
+            _staffkit_list(@args);
+
+        case 'add':
+        case 'save':
+            _no_console();
+            _staffkit_save(@args);
+
+        case 'del':
+        case 'delete':
+        case 'rem':
+        case 'remove':
+            _staffkit_delete(@args);
+
+        case 'equip':
+        case 'use':
+            _no_console();
+            _staffkit_equip(@args);
+
+        case 'setdefault':
+            _staffkit_setDefault(@args);
+
+        case 're-save':
+            _no_console();
+            _staffkit_equip(@args);
+            _staffkit_delete(@args);
+            _staffkit_save(@args);
+
+        default:
+            _no_console();
+            _staffkit_equip(array(to_lower(@command)));
+    }
+<<<
