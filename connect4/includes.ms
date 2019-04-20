@@ -51,20 +51,20 @@ proc _C4_getAxis() {
 
 ### The least-most corner of the board. Lowest possible x, y, and z coords where more negative is lower.
 proc _C4_corner(@axis=false) {
-    @result = array(-1253, 9, 1461)
+    @result = array(-1253, 9, 1461);
     if(@axis) {
         switch(@axis) {
         case 'x':
-            @result = @result[0]
+            @result = @result[0];
         case 'y':
-            @result = @result[1]
+            @result = @result[1];
         case 'z':
-            @result = @result[2]
+            @result = @result[2];
         default:
-            _error("Invalid argument for C4_corner; @axis")
+            _error("Invalid argument for C4_corner; @axis");
         }
     }
-    return(@result)
+    return(@result);
 }
 
 ###
@@ -72,20 +72,20 @@ proc _C4_corner(@axis=false) {
 ###
 
 proc _C4_isEnabled(@die=true) {
-    @enabled = _import_get('cnct4.enabled')
+    @enabled = _import_get('cnct4.enabled');
     if(@enabled != true ) {
         if( @die ) {
-            _error('The Connect 4 arena is not enabled.')
+            _error('The Connect 4 arena is not enabled.');
         }
-        return(false)
+        return(false);
     }
-    return(true)
+    return(true);
 }
 
 proc _C4_isPlaying(@user=player()) {
-    @pl1 = _import_get('cnct4.player1')
-    @pl2 = _import_get('cnct4.player2')
-    return( @pl1 == @user || @pl2 == @user )
+    @pl1 = _import_get('cnct4.player1');
+    @pl2 = _import_get('cnct4.player2');
+    return( @pl1 == @user || @pl2 == @user );
 }
 
 proc _C4_getPlayer(@user=player()) {
@@ -119,13 +119,13 @@ proc _C4_reset() {
     if( _C4_getAxis() == 'x') {
         for(@x = 0, @x < 7, @x++) {
             for(@y = 0, @y < 6, @y++) {
-                set_block_at(@cornerx + @x, @cornery + @y, @cornerz, 0, 'Event')
+                _C4_setBlock(@cornerx + @x, @cornery + @y, @cornerz, 'AIR')
             }
         }
     } else {
         for(@z = 0, @z < 7, @z++) {
             for(@y = 0, @y < 6, @y++) {
-                set_block_at(@cornerx, @cornery + @y, @cornerz + @z, 0, 'Event')
+                _C4_setBlock(@cornerx, @cornery + @y, @cornerz + @z, 'AIR')
             }
         }
     }
@@ -170,7 +170,7 @@ proc _C4_podiumLight(@pl, @on) {
     } else {
         @block = 'AIR'
     }
-    set_block_at( _C4_podium(@pl)[0], _C4_podium(@pl)[1] - 2, _C4_podium(@pl)[2], data_values(@block), 'Event')
+    _C4_setBlock( _C4_podium(@pl)[0], _C4_podium(@pl)[1] - 2, _C4_podium(@pl)[2], @block)
 }
 
 ###           ###
@@ -284,9 +284,10 @@ proc _C4_play(@column) {
 
     ### Place piece in topmost, or error if column is full.
     for(@y = 0, @y <= 5, @y++) {
-        if( get_block_at(@cornerx, @cornery + @y, @cornerz + @column) == '0:0') {
+	@block = get_block(array('x':@cornerx, 'y':@cornery + @y, 'z':@cornerz + @column, 'world':'Event'));
+        if(@block == 'AIR') {
             
-            set_block_at(@cornerx, @cornery + @y, @cornerz + @column, @block)
+            _C4_setBlock(@cornerx, @cornery + @y, @cornerz + @column, @block)
             _export_store('cnct4.lastPlayer', @pl)
 
             if( @pl == 1 ) {
@@ -360,14 +361,25 @@ proc _C4_isStalemate() {
     @cornerx = _C4_corner('x')
     @cornery = _C4_corner('y')
     @cornerz = _C4_corner('z')
-    return(
-        get_block_at(@cornerx, @cornery + 5, @cornerz + 0) != '0:0' &&
-        get_block_at(@cornerx, @cornery + 5, @cornerz + 1) != '0:0' &&
-        get_block_at(@cornerx, @cornery + 5, @cornerz + 2) != '0:0' &&
-        get_block_at(@cornerx, @cornery + 5, @cornerz + 3) != '0:0' &&
-        get_block_at(@cornerx, @cornery + 5, @cornerz + 4) != '0:0' &&
-        get_block_at(@cornerx, @cornery + 5, @cornerz + 5) != '0:0' &&
-        get_block_at(@cornerx, @cornery + 5, @cornerz + 6) != '0:0')
+    if( _C4_getAxis() == 'x') {
+        return(
+            get_block(array('x':@cornerx + 0, 'y':@cornery + 5, 'z':@cornerz, 'world':'Event')) != 'AIR' &&
+            get_block(array('x':@cornerx + 1, 'y':@cornery + 5, 'z':@cornerz, 'world':'Event')) != 'AIR' &&
+            get_block(array('x':@cornerx + 2, 'y':@cornery + 5, 'z':@cornerz, 'world':'Event')) != 'AIR' &&
+            get_block(array('x':@cornerx + 3, 'y':@cornery + 5, 'z':@cornerz, 'world':'Event')) != 'AIR' &&
+            get_block(array('x':@cornerx + 4, 'y':@cornery + 5, 'z':@cornerz, 'world':'Event')) != 'AIR' &&
+            get_block(array('x':@cornerx + 5, 'y':@cornery + 5, 'z':@cornerz, 'world':'Event')) != 'AIR' &&
+            get_block(array('x':@cornerx + 6, 'y':@cornery + 5, 'z':@cornerz, 'world':'Event')) != 'AIR')
+    } else {
+        return(
+            get_block(array('x':@cornerx, 'y':@cornery + 5, 'z':@cornerz + 0, 'world':'Event')) != 'AIR' &&
+            get_block(array('x':@cornerx, 'y':@cornery + 5, 'z':@cornerz + 1, 'world':'Event')) != 'AIR' &&
+            get_block(array('x':@cornerx, 'y':@cornery + 5, 'z':@cornerz + 2, 'world':'Event')) != 'AIR' &&
+            get_block(array('x':@cornerx, 'y':@cornery + 5, 'z':@cornerz + 3, 'world':'Event')) != 'AIR' &&
+            get_block(array('x':@cornerx, 'y':@cornery + 5, 'z':@cornerz + 4, 'world':'Event')) != 'AIR' &&
+            get_block(array('x':@cornerx, 'y':@cornery + 5, 'z':@cornerz + 5, 'world':'Event')) != 'AIR' &&
+            get_block(array('x':@cornerx, 'y':@cornery + 5, 'z':@cornerz + 6, 'world':'Event')) != 'AIR')
+    }
 }
 
 ###            ###
@@ -435,7 +447,7 @@ proc _check4row(@cornerx, @cornery, @cornerz, @block) {
         for(@z = 0, @z < 7, @z++) {
     
             ### Defaults to z-axis, swaps to x-axis if needed inside the method.
-            @curblock = get_block_at(@cornerx, @cornery + @y, @cornerz + @z)
+            @curblock = get_block(array('x':@cornerx, 'y':@cornery + @y, 'z':@cornerz + @z, 'world':'Event'))
             if(@block == @curblock) {
                 if( _C4_checkline(@cornerx, @cornery + @y, @cornerz + @z, 'N', @block) ) {
                     return(true)
@@ -482,7 +494,7 @@ proc _C4_checkline(@x, @y, @z, @dir, @block) {
             @newz = @z
         }
 
-        @curblock = get_block_at(@newx, @newy, @newz)
+        @curblock = get_block(array('x':@newx, 'y':@newy, 'z':@newz, 'world':'Event'))
         if(@block != @curblock) {
             break()
         }
@@ -490,4 +502,13 @@ proc _C4_checkline(@x, @y, @z, @dir, @block) {
     }
 
     return(@count >= 4)
+}
+
+###         ###
+### Helpers ###
+###         ###
+proc _C4_setBlock(@x, @y, @z, @block) {
+    @world = 'Event';
+    @loc = array('x':@x, 'y':@y, 'z':@z, 'world':@world);
+    set_block(@loc, @block);
 }
