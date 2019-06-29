@@ -18,23 +18,34 @@ proc _dl_add(@player) {
     _dl_updateLast(@UUID);
     _dl_updateConsecutive(@UUID);
 
-    @amount = 5;
     @con = _dl_getConsecutive(@UUID);
-    if (@con % 7 == 0) {
-        @amount = 10;
-    }
-    if (@con % 49 == 0) {
-        @amount = 50;
-    }
-    #if (@today == 17890) { ### 2018-12-25
-    #    @amount += 100;
-    #}
+    @amount = _dl_getPayout(@con);
 
     set_timeout(2000, closure() {
         _dl_addAmount(@player, @amount, @con);
     });
 
     return(true);
+}
+
+proc _dl_getPayout(@con) {
+    ### Base rates for 7 weeks, 1 week, 1 day
+    if (@con % 49 == 0) {
+        @amount = 50;
+    }
+    else if (@con % 7 == 0) {
+        @amount = 10;
+    }
+    else {
+        @amount = 5;
+    }
+    
+    @today = _dl_getToday();
+    if (@today == 18255) { ### 2019-12-25
+        @amount += 100;
+    }
+
+    return(@amount);
 }
 
 ##
