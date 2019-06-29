@@ -36,27 +36,27 @@ proc _shops_purchase() { return(250); } ### Initial payment
 
 ### Buy a shop yo!
 proc _shops_buy(@shop) {
-    if( reg_count( '0', _rank(player()) ) > 0 ) {
+    if (reg_count( '0', _rank(player()) ) > 0) {
         _error('You need to be at least a [1] to make a shop.');
     }
 
-    if( _shops_has_info(@shop) && _shops_active(@shop) ) {
+    if (_shops_has_info(@shop) && _shops_active(@shop)) {
         _error('A player already owns this shop number.');
     }
 
-    if( @shop > 9999 ) {
+    if (@shop > 9999) {
         _error('You cannot purchase a shop number above 9999.');
     }
     
     ### Check they have enough dosh, and prep the 7 free days of upkeep.
     @cost = _shops_purchase();
     @freepay = _shops_perday() * 7;
-    if( acc_balance(player()) < @cost ) {
+    if (acc_balance(player()) < @cost) {
         _error("You need at least $@cost to buy a shop.");
     }
 
     ### Clear from categories, in case it was an expired shop before purchase.
-    foreach( _shops_cat_list(), @cat ) {
+    foreach (_shops_cat_list(), @cat) {
         _shops_cat_off(@shop, @cat, true);
     }
 
@@ -75,16 +75,16 @@ proc _shops_buy(@shop) {
 ### Add money to a shop's balance.
 proc _shops_addbalance(@shop, @money) {
     @info = _shops_get_info(@shop);
-    if( !is_integral(@money) || @money < 1 ) {
+    if (!is_integral(@money) || @money < 1) {
         _error('You may only deposit whole dollars.');
     }
 
-    if( acc_balance(player()) < @money ) {
+    if (acc_balance(player()) < @money) {
         _error('You do not have enough money in your account.');
     }
 
     ### Means they ran out of rent.
-    if( !_shops_active(@shop) ) {
+    if (!_shops_active(@shop)) {
         #_error("Sorry, but you have ran out of money in your account. You need to re-purchase a shop.")
         @info['balance'] = 0;
         @info['time'] = time();
@@ -102,26 +102,26 @@ proc _shops_remove(@shop, @silent=false, @force=false) {
     @info = _shops_get_info(@shop);
 
     ### Only allow the owner or staff to remove shops.
-    if( _UUID_player_get(player()) != @info['owner'] && !@force ) {
+    if (_UUID_player_get(player()) != @info['owner'] && !@force) {
         _verify_staff('You do not own this shop.');
     }
 
     ### Fail-safe
-    if( !import("shops.failsafe.@shop") && !@force ) {
+    if (!import("shops.failsafe.@shop") && !@force) {
         msg(colorize("&4Warning: &cYou are about to remove &4shop @shop&c.\nTo remove the shop, run the same command again."));
         export("shops.failsafe.@shop", true);
         die();
     }
 
     ### Clear from categories
-    foreach( _shops_cat_list(), @cat ) {
+    foreach (_shops_cat_list(), @cat) {
         _shops_cat_off(@shop, @cat, true);
     }
     clear_value("shops.info.@shop");
     export("shops.info.@shop", null);
     export("shops.failsafe.@shop", null);
 
-    if( !@silent ) {
+    if (!@silent) {
         msg(colorize("&6Successfully removed Shop &e@{shop}&6..."));
     }
 
@@ -131,7 +131,7 @@ proc _shops_remove(@shop, @silent=false, @force=false) {
 proc _shops_remove_all() {
     _verify_op();
     @vals = array_keys(get_values("shops"));
-    foreach(@val in @vals) {
+    foreach (@val in @vals) {
         clear_value(@val);
         msg("Removed @val");
     }
@@ -146,19 +146,19 @@ proc _shops_teleport(@shop, @silent=false) {
    
     ### Get a random shop if required
     @random = false;
-    if( to_lower(@shop) == 'random' ) {
-	_error('Random teleports disabled for spam');
-        @random = true;
-        @list = array_keys(get_values('shops.info.'));
-        for(@i = 0, @i < 5, @i++) {
-            @shop = split('.', @list[array_rand(@list)[0]])[2];
-            if( _shops_active(@shop) ) {
-                break();
-            }
-        }
+    if (to_lower(@shop) == 'random') {
+        _error('Random teleports disabled for spam');
+        #@random = true;
+        #@list = array_keys(get_values('shops.info.'));
+        #for (@i = 0, @i < 5, @i++) {
+        #    @shop = split('.', @list[array_rand(@list)[0]])[2];
+        #    if( _shops_active(@shop) ) {
+        #        break();
+        #    }
+        #}
     }
 
-    if( !_shops_active(@shop) ) {
+    if (!_shops_active(@shop)) {
         _error('The owner has not paid their rent!');
     }
 
@@ -166,7 +166,7 @@ proc _shops_teleport(@shop, @silent=false) {
     @info = _shops_get_info(@shop);
     @ploc = @info['ploc'];
 
-    if( @ploc == null ) {
+    if (@ploc == null) {
         _error("This shop does not have a location set...");
     }
 
@@ -177,7 +177,7 @@ proc _shops_teleport(@shop, @silent=false) {
 
     _shops_tphistory_add(@shop, _UUID_player_get(@self), @random);
 
-    if( !@silent ) {
+    if (!@silent) {
         @owner = _UUID_usernames_lastname(@info['owner']);
         msg(colorize("&6Teleporting to &e@{owner}&6's Shop @shop..."));
     }
@@ -207,23 +207,23 @@ proc _shops_store_info(@shop, @info) {
 ### Generate the @info array.
 proc _shops_generate_info(@UUID, @ploc, @money, @time=time(), @likes=array()) {
     _teleport_bannedblocks(@ploc); ### Testing if teleport location is legal.
-    return( array(owner: @UUID, ploc: @ploc, balance: @money, time: @time, likes: @likes) );
+    return (array(owner: @UUID, ploc: @ploc, balance: @money, time: @time, likes: @likes));
 }
 
 ### Get the information for a shop.
 proc _shops_get_info(@shop) {
-    if( !_shops_has_info(@shop) ) {
+    if (!_shops_has_info(@shop)) {
         _error("Shop '@shop' not found.");
     }
-    return( _import_get("shops.info.@shop") );
+    return(_import_get("shops.info.@shop"));
 }
 
 ### Check if a shop has information (i.e, exists).
 proc _shops_has_info(@shop) {
-    if( !is_integral(@shop) || @shop <= 0 || @shop[0] == 0) {
+    if (!is_integral(@shop) || @shop <= 0 || @shop[0] == 0) {
         _error("'@shop' is not an integer, or is less than 1.");
     }
-    return( _import_get("shops.info.@shop") != null );
+    return(_import_get("shops.info.@shop") != null);
 }
 
 ### Check if a person has enough money in their shop account.
@@ -271,17 +271,14 @@ proc _shops_print_info(@shop) {
     }
 
     ### Categories which this shop is a part of.
+    ### TODO also store locally in the array
     @cats = array();
-    foreach(@cat in _shops_cat_list()) {
-        if( array_contains_ic( _shops_cat_get(@cat), @shop) ) {
+    foreach (@cat in _shops_cat_list()) {
+        if (array_contains_ic(_shops_cat_get(@cat), @shop)) {
             @cats[] = @cat;
         }
     }
 
-    ### How many likes this shop has.
-    @likes = array_size(@info['likes']);
-
-    ### Rating
     @rating = _shops_rating(@shop, @info);
 
     msg(colorize(" &7===== &5Shop @shop &7====="));
@@ -289,19 +286,17 @@ proc _shops_print_info(@shop) {
     msg(colorize("&6Purchased: &e@purchased"));
     msg(colorize("&6Status: &e@status"));
     msg(colorize("&6Categories: &e@cats"));
-    msg(colorize("&6Likes: &e@likes"));
     msg(colorize("&6Rating: &e@rating"));
     
-    ### Staff and owner only info
-    if(_UUID_player_get(player()) != @info['owner'] && !has_permission('ch_staff')) {
+    ### Staff and owner only info below
+    if (_UUID_player_get(player()) != @info['owner'] && !has_permission('ch_staff')) {
         die();
     }
-
-    ### Coordinates
+    @likes = array_size(@info['likes']);
     @ploc = @info['ploc'];
     @coords = 'x:'.floor(@ploc['x']). ' y:'.floor(@ploc['y']). ' z:'.floor(@ploc['z']);
     
-    msg(colorize(" &7===== &5Owner Only Info &7====="));
+    msg(colorize("&5Likes: &d@likes"));
     msg(colorize("&5Location: &d@coords"));
 
 }
@@ -339,12 +334,12 @@ proc _shops_cat_get(@category) {
 
 ### Toggle category on a shop.
 proc _shops_cat_toggle(@shop, @category) {
-    if( !_shops_has_info(@shop) ) {
+    if (!_shops_has_info(@shop)) {
         _error("Shop '@shop' not found.");
     }
     
     @list = _shops_cat_get(@category);
-    if( array_contains_ic(@list, @shop) ) {
+    if (array_contains_ic(@list, @shop)) {
         _shops_cat_off(@shop, @category);
     } else {
         _shops_cat_on(@shop, @category);
@@ -357,7 +352,7 @@ proc _shops_cat_off(@shop, @category, @silent=false) {
     @lowcat = to_lower(@category);
     store_value("shops.cat.@lowcat", @list);
     
-    if( !@silent ) {
+    if (!@silent) {
         msg(colorize("&6Removed Shop &e@shop &6from category &e@category"));
     }
 }
@@ -368,7 +363,7 @@ proc _shops_cat_on(@shop, @category, @silent=false) {
     @lowcat = to_lower(@category);
     store_value("shops.cat.@lowcat", @list);
 
-    if( !@silent ) {
+    if (!@silent) {
         msg(colorize("&6Added Shop &e@shop &6to category &e@category"));
     }
 }
@@ -383,11 +378,11 @@ proc _shops_likes_toggle(@shop, @UUID) {
     @UUID = _UUID_unaltered(@UUID);
     @likes = @info['likes'];
 
-    if( !is_array(@likes) ) {
+    if (!is_array(@likes)) {
         @likes = array();
     }
 
-    if( array_contains_ic(@likes, @UUID) ) {
+    if (array_contains_ic(@likes, @UUID)) {
         array_remove_values(@likes, @UUID);
         msg(colorize("&6You have unliked &eShop @shop"));
     } else {
@@ -499,43 +494,50 @@ proc _shops_paginate(@title, @list, @split=false) {
 
     ### Loops a max of 8 times, or the size of the list, ignoring expired shop.
     @i = 0;
-    while( @i < min(@size, 8) ) {
+    while (@i < min(@size, 8)) {
         
-        try(
-            @id = rand(array_size(@list)),
-            @id = 0;
-        )
-        try(@shop = @list[@id],
+        if (@size == 0) {
             break();
-        )
+        }
+            
+        @id = rand(@size);
+        @shop = @list[@id];
+
         array_remove_values(@list, @shop);
+        @size = array_size(@list);
         
-        if( @split ) { ### Split is for when it is "All Shops", as the supplied array is database keys.
+        if (@split) { ### Split is for when it is "All Shops", as the supplied array is database keys.
             @shop = split('.', @shop)[2];
         }
 
-        if( _shops_active(@shop) ) {
-            _shops_printline(@shop);
+        if (_shops_active(@shop)) {
+            _shops_printline(@shop, false);
             @i++;
         }
     }
 }
 
 ### Prints a single line for the pagination and likes_descending functions.
-proc _shops_printline(@shop) {
+proc _shops_printline(@shop, @showRating=true) {
 
     @info = _shops_get_info(@shop);
     @owner = _UUID_usernames_lastname(@info['owner']);
-    #@likes = array_size(@info['likes']);
     @active = _shops_active(@shop);
-
     @rating = _shops_rating(@shop, @info);
+    #@likes = array_size(@info['likes']);
+
+    ### Produce rating string
+    if (@showRating) {
+        @ratingMsg = " &7&o(Rating: @rating)";
+    } else {
+        @ratingMsg = '';
+    }
 
     ### Display normally, or in red if shop is expired.
-    if( @active ) {
-        msg(colorize("&5Shop @shop &dby &5@owner &7&o(Rating: @rating)"));
+    if (@active) {
+        msg(colorize("&5Shop @shop &dby &5@{owner}@{ratingMsg}"));
     } else {
-        msg(colorize("&4&mShop @shop &c&mby &4&m@owner&7&o (Rating: @rating)"));
+        msg(colorize("&4&mShop @shop &c&mby &4&m@{owner}@{ratingMsg}"));
     }
 }
 
@@ -546,7 +548,7 @@ proc _shops_expire_alert(@shop) {
     ### Delete shop outright if less than 5 likes and expired more than 2 days ago, or just expired over 20 days ago
     @likes = array_size(@info['likes']);
     @days = _shops_daysLeft(@shop);
-    if( (@likes < 5 && @days < -2) || @days < -20 ) {
+    if ((@likes < 5 && @days < -2) || @days < -20) {
         _shops_remove(@shop, true, true);
     } else {
         store_value("shops.expirenotify.@UUID", @shop);
@@ -588,19 +590,20 @@ proc _shops_tphistory_score(@shop) {
     @list = get_value("shops.tphistory.@shop");
     @score = 0;
 
-    if(is_array(@list)) {
+    if (is_array(@list)) {
         foreach(@UUID: @count in @list) {
-            @base = 3;
-            if(@count >= @base + 5) {
+            @base = 2;
+            @inc = 10;
+            if(@count >= @base + @inc) {
                 @score += 1;
             }
             else if(@count > @base) {
-                @score += 0.2 * (@count - @base);
+                @score += (@count - @base) / @inc;
             }
         }
     }
 
-    return(ceil(@score ** 0.5 * 2));
+    return(ceil(@score));
 }
 
 proc _shops_tphistory_clearall() {

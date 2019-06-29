@@ -160,7 +160,7 @@
             _shops_remove_all();
 
         default:
-            if( is_integral(@p1) ) {
+            if (is_integral(@p1)) {
                 _no_console();
                 _shops_teleport(@p1);
             } else {
