@@ -5,7 +5,7 @@
 #                       #
 #########################
 
-### CodebotoCodecoon
+### @RobotoRaccoon
 
 *:/uuid [$p] [$] = >>>
     if( $p == '' ) {

@@ -1,0 +1,78 @@
+#########################
+#                       #
+# THIS IS A MASTER FILE #
+#  ~/minecraft/master   #
+#                       #
+#########################
+
+### @hugaraxia
+### @RobotoRaccoon
+
+#####################
+####################
+###################
+#
+# IF YOU'RE GOING TO MAKE THIS COMMAND WRITE TO THE DATABASE,
+# ONLY DO SO FOR THOSE USERS WHO HAVE JOINED MCAU AT LEAST ONCE
+# IN THEIR HISTORY - ELSE YOU WILL BREAK A FEW ASSUMPTIONS THAT
+# HAVE BEEN CONTINUOUSLY BUILT UPON WITH THE _UUID... FUNCTIONS
+#
+###################
+####################
+#####################
+
+*:/onlineuuid [$player] = >>>
+    _verify_janitor();
+    @p = $player;
+    if (!@p) {
+        _error('You must provide a playername.');
+    }
+   
+    #Queries Mojang for the official UUID from current playername.
+    proc _uuid_request(@username){
+        @uuidURI = "https://api.mojang.com/users/profiles/minecraft/@username";
+
+        http_request(@uuidURI, closure(@response) {
+            @rc = @response['responseCode'];
+            @rt = @response['responseText'];
+            if (@rc != 200) {
+                _error("The server request responded with HTTP response code @rc - @rt");
+            }
+            @body = json_decode(@response['body']);
+            @uuid = @body['id'];
+            return(_names_request(@uuid));
+        });
+    }
+
+    #Queries for all playernames used by UUID.
+    proc _names_request(@uuid){
+        @namesURI = "https://api.mojang.com/user/profiles/@{uuid}/names";
+    
+        http_request(@namesURI, closure(@response){
+            @rc = @response['responseCode'];
+            @rt = @response['responseText'];
+            if (@rc != 200) {
+                _error("The server request responded with HTTP response code @rc - @rt");
+            }
+            _handle_UUID_response(json_decode(@response['body']));
+        });
+    }
+
+    #Called in _names_request(), handles the response array.
+    proc _handle_UUID_response(@body){
+        @firstname = @body[0]['name'];
+        msg(colorize("&4First name used:&c @firstname"));
+        @names = @body[cslice(1, array_size(@body) - 1)];
+        foreach (@namechange in @names){
+            @changetime = simple_date('dd/MM/yy', @namechange['changedToAt']);
+            @newname = @namechange['name'];
+            msg(colorize("&4Changed name to&c @newname &4on&c @changetime"));
+        }
+    }
+    
+    #Begins actual requests section.
+    msg(colorize("&4Name history for player:&c @p ..."));
+    _uuid_request(@p);
+<<<
+
+
