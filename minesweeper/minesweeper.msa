@@ -75,7 +75,8 @@
         @all = get_values('minesweeper.leader.player.');
         @keys = array_keys(@all);
 
-        @cfg = array('small', 'medium', 'large');
+        @cfg = array_keys(_MS_config());
+        array_remove_values(@cfg, 'custom');
 
         foreach(@keys as @personal){
             @player = split('.', @personal)[3];
@@ -110,7 +111,9 @@
         _verify_op()
         ### DON'T DO THIS FOR ANY REASON ###
 
-        @cfg = array('small', 'medium', 'large');
+        @cfg = array_keys(_MS_config());
+        array_remove_values(@cfg, 'custom');
+        
         foreach(@size in @cfg) {
    
             @oldSize = to_upper(substr(@size, 0, 1)). substr(@size, 1);
@@ -141,7 +144,7 @@
     }
 
     if(@cmd == 'clearuseromg' ) {
-        #/mines clearuseromg mcau small 33.98
+        #/mines clearuseromg mcau small
         @UUID = _UUID_player_altered(@args[0])
         @pbs = get_value("minesweeper.leader.uuid.@UUID")
         if( is_null(@pbs) ) {
@@ -149,10 +152,13 @@
         }
 
         @p3 = @args[1]
-        @p4 = @args[2]
         if( @p3 == 'small' || @p3 == 'medium' || @p3 == 'large' ) {
             @leader = get_value("minesweeper.leader.size.@p3");
-            array_remove_values(@leader, array(@args[0], @p4));
+            foreach (@value in @leader) {
+                if (to_lower(@value[0]) == @args[0]) {
+                    array_remove_values(@leader, @value);
+                }
+            }
             store_value("minesweeper.leader.size.@p3", @leader);
             array_remove(@pbs, @p3);
         } else {

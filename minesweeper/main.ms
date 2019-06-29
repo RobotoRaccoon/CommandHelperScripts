@@ -10,7 +10,7 @@ include('includes.library/includes.ms');
 include('includes.library/commands.ms');
 
 bind(player_interact, null, null, @event,
-    if(pworld() != 'Event' || !array_contains_ic(sk_regions_at(ploc()), 'mine-whole')) {
+    if (pworld() != 'Event' || !array_contains_ic(sk_regions_at(ploc()), 'mine-whole')) {
         die();
     }
 
@@ -22,25 +22,25 @@ bind(player_interact, null, null, @event,
     @arena = _MS_getArena(@player);
     @y = _MS_corner(@arena)[1];
     @validBlock = array_contains(array('SNOW_BLOCK', 'FLOWER_POT'), @event['block']);
-    if(@event['action'] == 'left_click_block' && !@validBlock) {
+    if (@event['action'] == 'left_click_block' && !@validBlock) {
         @clicks = import("minesweeper.cheatclicks.@player");
-        if(is_null(@clicks)) {
+        if (is_null(@clicks)) {
             @click = 0;
         }
         @clicks++;
+        @max = 3;
 
-        if(@clicks > 3) {
+        if(@clicks > @max) {
             @arena = _MS_getArena(@player);
             _MS_reset(@arena);
             msg(colorize('&4BZZT. &cYou have been kicked for attempted cheating. Do not attempt to break the floor.'));
         } else {
-            msg(colorize('&cDo not break anything but snow and flowerpots. Continued breakage will result in your match being cancelled.'))
+            msg(colorize("&cDo not break anything but snow and flowerpots. Continued breakage will result in your match being cancelled."))
             export("minesweeper.cheatclicks.@player", @clicks);
         }
 
-        cancel()
+        cancel();
     }
-
     else if(@event['action'] == 'right_click_block' && @validBlock) {
         @loc = @event['location'];
         _MS_toggleFlag(@loc['x'], @y+1, @loc['z']);
