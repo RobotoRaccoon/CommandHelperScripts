@@ -196,15 +196,15 @@ proc _RAP_print_UUID(@UUID) {
     @bans = _RAP_count_get(@UUID, 'ban');
     @total = @kicks + @mutes + @jails + @bans;
 
-    if( @total == 0 ) {
+    if (@total == 0) {
         msg(colorize('&7This UUID has not committed any crimes.'));
     }
 }
 
 ### Prints the entire rap sheet (Player)
 proc _RAP_print_player(@player) {
-    @player = _autocomplete_player(@player);
-    _RAP_print_UUID( _UUID_player_get(@player, true) );
+    @player = _autocomplete_player(@player, false, true);
+    _RAP_print_UUID(_UUID_player_get(@player, true));
 }
 
 ###                  ###

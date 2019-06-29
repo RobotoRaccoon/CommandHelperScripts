@@ -26,7 +26,12 @@
 *:/rap [$p] = >>>
     _verify_janitor();
     _RAP_print_player($p);
-    msg(colorize("&cView old rap with &4/oldrap <first-username>"));
+   
+    ### /oldrap compatibility
+    try(@u = _UUID_alternate_accounts($p)[0]; 
+    if (array_size(get_values("bandb.@u")) > 0) {
+        msg(colorize("&cView old rap with &4/oldrap @u"));
+    })
 <<<
 
 *:/uuidrap [$id] = >>>
