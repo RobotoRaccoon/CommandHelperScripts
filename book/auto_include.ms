@@ -11,7 +11,7 @@
 ### Commands ###
 ###          ###
 proc _book_help(@page=1, @player=player()) {
-    
+
     ### All commands go here if they are to show up in the help command.
     @commands = array(
             '&5List &f> &dDisplays available books',
@@ -57,11 +57,11 @@ proc _book_save(@id) {
 
     ### Error if book exists already, or no ID is supplied.
     _book_exists(@id, true)
-   
+
     ### Make sure player is holding a written book.
     _book_isHolding(true)
     @meta = get_itemmeta(pinfo(player(), 15))
-    
+
     ### Store the meta to the DB.
     store_value("CHBook.meta.@id", @meta)
     msg(colorize("&6Successfully saved book &e@{id}&6."))
@@ -87,7 +87,7 @@ proc _book_setTitle(@newTitle) {
     ### Make sure player is holding a written book.
     _book_isHolding(true)
     @meta = get_itemmeta(pinfo(player(), 15))
-    
+
     @meta['title'] = @newTitle
     set_itemmeta(pinfo(player(), 15), @meta)
 }
@@ -99,7 +99,7 @@ proc _book_setAuthor(@newAuthor) {
     ### Make sure player is holding a written book.
     _book_isHolding(true)
     @meta = get_itemmeta(pinfo(player(), 15))
-    
+
     @meta['author'] = @newAuthor
     set_itemmeta(pinfo(player(), 15), @meta)
 }
@@ -120,29 +120,29 @@ proc _book_unwrite() {
 }
 
 proc _book_firstJoin(@id) {
-    _verify_staff()
+    _verify_staff();
 
     ### Error if book exists already, or no ID is supplied.
-    if( !_book_exists(@id) ) {
-        _error('A book under this ID cannot be found. Try /book list')
+    if (!_book_exists(@id)) {
+        _error('A book under this ID cannot be found. Try /book list');
     }
 
     ### Get the list as an array.
-    @list = get_value("CHBook.firstjoin")
-    if( !is_array(@list) ) {
-        @list = array()
+    @list = get_value("CHBook.firstjoin");
+    if (!is_array(@list)) {
+        @list = array();
     }
 
     ### Toggle whether the ID is in the list.
-    if( array_contains_ic(@list, @id) ) {
-        array_remove_values(@list, @id)
-        msg(colorize("&6Removed book &e@id &6from the list."))
+    if (array_contains_ic(@list, @id)) {
+        array_remove_values(@list, @id);
+        msg(colorize("&6Removed book &e@id &6from the list."));
     } else {
-        array_push(@list, @id)
-        msg(colorize("&6Added book &e@id &6to the list."))
+        @list[] = @id;
+        msg(colorize("&6Added book &e@id &6to the list."));
     }
-        
-    store_value("CHBook.firstjoin", @list)
+
+    store_value("CHBook.firstjoin", @list);
 }
 
 #proc _book_implode(@id) {
@@ -161,27 +161,27 @@ proc _book_firstJoin(@id) {
 ### Other functions ###
 ###                 ###
 proc _book_getList() {
-    @keys = array_keys(get_values('CHBook.meta.'))
-    @list = array()
+    @keys = array_keys(get_values('CHBook.meta.'));
+    @list = array();
     foreach(@key in @keys) {
-        array_push(@list, split('.', @key, 2)[2])
+        @list[] = split('.', @key, 2)[2];
     }
-    return(@list)
+    return(@list);
 }
 
 ### Does the meta for this book exist?
 proc _book_exists(@id, @die=false) {
-    if( @id == null || @id == '' ) {
-        _error('Please supply a book name.')
+    if (@id == null || @id == '') {
+        _error('Please supply a book name.');
     }
 
-    if( has_value("CHBook.meta.@id") ) {
-        if( @die ) {
-            _error('A book with this ID already exists.')
+    if (has_value("CHBook.meta.@id")) {
+        if (@die) {
+            _error('A book with this ID already exists.');
         }
-        return(true)
+        return(true);
     }
-    return(false)
+    return(false);
 }
 
 ### Is player holding a written book?
@@ -194,3 +194,4 @@ proc _book_isHolding(@die=false) {
     }
     return(false)
 }
+

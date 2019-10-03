@@ -5,9 +5,13 @@
 #                       #
 #########################
 
-### CodebotoCodecoon
+### @RobotoRaccoon
 
-bind(player_join, null, null, @e,
+_register_tabcomp_cmd('book', closure() {
+    return(_book_getList());
+});
+
+bind('player_join', null, null, @e) {
     if (@e['first_login'] != true) {
         die();
     }
@@ -21,4 +25,5 @@ bind(player_join, null, null, @e,
         @meta = get_value("CHBook.meta.@id");
         pgive_item(array(name:'WRITTEN_BOOK', meta:@meta));
     }
-)
+}
+
