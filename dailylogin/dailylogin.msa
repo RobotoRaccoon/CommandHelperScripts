@@ -5,7 +5,8 @@
 #                       #
 #########################
 
-### CodebotoCodecoon (Created 2018-12-15)
+## @RobotoRaccoon (Created 2018-12-15)
+
 *:/dailylogin [$p1] [$p2] [$p3] [$] = >>>
     include('dlProcs.ms');
 
@@ -24,9 +25,10 @@
         if (@p2 == '') {
             @player = player();
         } else {
-            @player = _autocomplete_player(@p2);
+            @player = _autocomplete_player(@p2, false, true); # No warning
         }
-        @UUID = _UUID_player_altered(@player);
+        @UUID = _UUID_player_altered(@player, true); # Error
+        @player = _UUID_usernames_lastname(@UUID);
         @days = _dl_checkConsecutive(@UUID);
         msg(colorize("&e@player &6has logged in for &e@days &6consecutive days"));
 
@@ -37,11 +39,19 @@
     case 'top':
         _dl_cmd_top(@p2);
 
+    case 'current':
+        _dl_cmd_current(@p2);
+
     case 'update':
         _verify_op();
-        msg(colorize("&6Checking all online players..."));
-        foreach(@player in all_players()) {
-            _dl_add(@player);
+        if (@p2 == '') {
+            msg(colorize("&6Checking all online players..."));
+            foreach(@player in all_players()) {
+                _dl_add(@player);
+            }
+        } else {
+            msg(colorize("&6Checking @p2"));
+            _dl_add(@p2);
         }
 
     case 'set-best':

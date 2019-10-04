@@ -39,7 +39,7 @@ proc _dl_getPayout(@con) {
     else {
         @amount = 5;
     }
-    
+
     @today = _dl_getToday();
     if (@today == 18255) { ### 2019-12-25
         @amount += 100;
@@ -89,16 +89,30 @@ proc _dl_checkConsecutive(@UUID) {
 }
 
 proc _dl_cmd_top(@page) {
-    @top = _dl_topList();
-    
+    ## Call asynchronously
+    x_new_thread('dailylogin.top', closure() {
+        _dl_cmd_top_x(@page, 'top');
+    });
+}
+
+proc _dl_cmd_current(@page) {
+    ## Call asynchronously
+    x_new_thread('dailylogin.current', closure() {
+        _dl_cmd_top_x(@page, 'current');
+    });
+}
+
+proc _dl_cmd_top_x(@page, @cmd) {
+    @top = _dl_topList(@cmd == 'top');
+
     @perpage = 8;
     @maxpage = ceil(array_size(@top) / @perpage);
-    if(!is_numeric(@page) || @page < 1 || @page > @maxpage) {
+    if (!is_numeric(@page) || @page < 1 || @page > @maxpage) {
         @page = 1;
     }
 
     msg(colorize('&e-- &cDaily login &fleaderboard &e--'));
-    for(@i = 0, @i < @perpage, @i++) {
+    for (@i = 0, @i < @perpage, @i++) {
 
         @pos = (@page - 1) * @perpage + @i;
         @realpos = @pos + 1;
@@ -107,20 +121,22 @@ proc _dl_cmd_top(@page) {
             @info = @top[@pos];
             @player = _UUID_usernames_lastname(@info['uuid']);
             @count = @info['count'];
-            @current = _dl_checkConsecutive(@info['uuid']);
+            @current = @info['streak'];
             msg(colorize("&e@realpos. &5@player&f: @count days &7&o(current: @current)"));
         } else {
             msg(colorize("&e@realpos. &cN/A"));
         }
     }
-    msg(colorize("&6Page &e@page/@maxpage&6. View more with &e/dailylogin top <page>"));
+    msg(colorize("&6Page &e@page/@maxpage&6. View more with &e/dailylogin @cmd <page>"));
 }
 
-proc _dl_topList() {
-    @top = import('dailylogin.top');
-    ### Reset every 3 minutes
+proc _dl_topList(@best) {
+    @saved = "dailylogin.top.@best";
+    @top = import(@saved);
+
+    ### Reset every 6 minutes
     if (is_array(@top)) {
-        if (time() - 180000 < @top['time']) {
+        if (time() - 360000 < @top['time']) {
             return(@top['list']);
         }
     }
@@ -130,17 +146,23 @@ proc _dl_topList() {
     foreach (@key : @value in @values) {
         @UUID = split('.', @key)[2];
         @count = _dl_getBest(@UUID);
+        @streak = _dl_checkConsecutive(@UUID);
         if (@count > 1) {
-            @list[] = array(uuid: @UUID, count: @count);
+            @list[] = array(uuid: @UUID, count: @count, streak: @streak);
         }
     }
 
-    array_sort(@list, closure(@left, @right){
-        return(@left['count'] < @right['count']);
+    if (@best) {
+        @key = 'count';
+    } else {
+        @key = 'streak';
+    }
+    array_sort(@list, closure(@left, @right) {
+        return(@left[@key] < @right[@key]);
     });
 
     @top = array(time: time(), list: @list);
-    export('dailylogin.top', @top);
+    export(@saved, @top);
 
     return(@list);
 }
@@ -204,3 +226,4 @@ proc _dl_updateBest(@UUID, @count) {
         _export_store("dailylogin.best.@UUID", @count);
     }
 }
+

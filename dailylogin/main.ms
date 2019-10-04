@@ -5,9 +5,10 @@
 #                       #
 #########################
 
-### CodebotoCodecoon
-bind(player_join, null, null, @e,
-    include('dlProcs.ms');
+### @RobotoRaccoon
+include('dlProcs.ms');
+
+bind('player_join', null, null, @e) {
     _dl_add(@e['player']);
-)
+}
 
