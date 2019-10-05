@@ -27,7 +27,7 @@
     if (!@p) {
         _error('You must provide a playername.');
     }
-   
+
     #Queries Mojang for the official UUID from current playername.
     proc _uuid_request(@username){
         @uuidURI = "https://api.mojang.com/users/profiles/minecraft/@username";
@@ -47,7 +47,7 @@
     #Queries for all playernames used by UUID.
     proc _names_request(@uuid){
         @namesURI = "https://api.mojang.com/user/profiles/@{uuid}/names";
-    
+
         http_request(@namesURI, closure(@response){
             @rc = @response['responseCode'];
             @rt = @response['responseText'];
@@ -69,10 +69,9 @@
             msg(colorize("&4Changed name to&c @newname &4on&c @changetime"));
         }
     }
-    
+
     #Begins actual requests section.
     msg(colorize("&4Name history for player:&c @p ..."));
     _uuid_request(@p);
 <<<
-
 

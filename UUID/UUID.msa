@@ -5,10 +5,10 @@
 #                       #
 #########################
 
-### @RobotoRaccoon
+## @RobotoRaccoon
 
 *:/uuid [$p] [$] = >>>
-    if( $p == '' ) {
+    if ($p == '') {
         @UUID = puuid();
     } else {
         @player = _autocomplete_player($p, false, true);
@@ -21,21 +21,35 @@
 <<<
 
 *:/uuidlookup [$u] [$] = >>>
-    if( $u == '' ) {
+    if ($u == '') {
         @UUID = puuid();
     } else {
         @UUID = _UUID_unaltered(to_lower($u));
     }
 
-    if(length(@UUID) != 36 || reg_count('[g-z]', @UUID) != 0) {
+    # ^[a-f0-9]{8}(-[a-f0-9]{4}){2}-[a-f0-9]{8}$
+    if (length(@UUID) != 36 || reg_count('[g-z]', @UUID) != 0) {
         _error('You have entered an invalid UUID. An example is 7413ff56-ea0c-45dc-8c1d-e32b923e90a8');
     }
 
     @AssociatedUsernames = _UUID_usernames_list(@UUID);
-    if(is_array(@AssociatedUsernames)) {
+    if (is_array(@AssociatedUsernames)) {
         msg(colorize("&eUUID: &6@UUID"));
         msg(colorize("&eKnown usernames: &6". array_implode(@AssociatedUsernames, '&e, &6')));
     } else {
         _error('No one under this UUID has logged on since tracking started.');
     }
+<<<
+
+*:/findname $u = >>>
+x_new_thread('findname', closure() {
+    _verify_op();
+    @partial = to_lower($u);
+    foreach (@key : @value in get_values('uuid.player')) {
+        @name = split('.', @key)[2];
+        if (string_contains(@name, @partial)) {
+            msg(@name);
+        }
+    }
+});
 <<<
