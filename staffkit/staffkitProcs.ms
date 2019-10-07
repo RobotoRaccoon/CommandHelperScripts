@@ -5,7 +5,7 @@
 #                       #
 #########################
 
-### CodebotoCodecoon
+### @RobotoRaccoon
 
 ###          ###
 ### Commands ###
@@ -17,7 +17,7 @@ proc _staffkit_help(@args) {
     } else {
         @page = @args[0];
     }
-    
+
     ### All commands go here if they are to show up in the help command.
     @commands = array(
             '&5List &f> &dDisplay all kits',
@@ -91,7 +91,7 @@ proc _staffkit_setDefault(@args) {
 
 proc _staffkit_getKitList() {
     @kits = get_value('staffkit.kitlist');
-    if(!is_array(@kits)) {
+    if (!is_array(@kits)) {
         @kits = array();
     }
     return(@kits);
@@ -145,3 +145,4 @@ proc _staffkit_getDefaultKit() {
 proc _staffkit_setDefaultKit(@name) {
     store_value('staffkit.default', @name);
 }
+
