@@ -27,17 +27,17 @@ proc _RAP_section_list() {
 ## Check if a section is l3g1t
 proc _RAP_section_check(@section) {
     @allowed = _RAP_section_list();
-    if( !array_contains_ic(@allowed, @section) ) {
-        _error('This section for a rap sheet record is not found. Allowed sections: '. array_implode(@allowed, ', '));
+    if (!array_contains_ic(@allowed, @section)) {
+        _error("Section '@section' does not exist. Allowed sections: ". array_implode(@allowed, ', '));
     }
 
-    return( to_lower(@section) );
+    return(to_lower(@section));
 }
 
 ## Get the total number of added records
 proc _RAP_count_get(@UUID, @section) {
-    @UUID = _UUID_altered(@UUID);
     @section = _RAP_section_check(@section);
+    @UUID = _UUID_altered(@UUID);
     @count = get_value('rapsheet', @UUID, @section, 'count');
     if (!is_integral(@count)) {
         @count = 0;
@@ -48,8 +48,8 @@ proc _RAP_count_get(@UUID, @section) {
 
 ## Add 1 to the count for a section
 proc _RAP_count_increment(@UUID, @section) {
-    @UUID = _UUID_altered(@UUID);
     @section = _RAP_section_check(@section);
+    @UUID = _UUID_altered(@UUID);
     @count = _RAP_count_get(@UUID, @section);
 
     @count += 1;
@@ -143,6 +143,27 @@ proc _RAP_info_generate_timed(@reason, @timestamp, @staff, @length) {
     return(_RAP_info_generate(@reason, @timestamp, @staff, @length));
 }
 
+proc _RAP_parse_args(@args) {
+    @args = split(' ', @args);
+    @params = associative_array(full: false, sections: null);
+
+    while (array_size(@args) > 0) {
+        @word = array_remove(@args, 0);
+        switch(@word) {
+        case 'full':
+            @params['full'] = true;
+
+        case 'show':
+            if (array_size(@args) == 0) {
+                _error('Argument error, requires a comma separated list of sections');
+            }
+            @params['sections'] = array_unique(split(',', array_remove(@args, 0)));
+        }
+    }
+
+    return(@params);
+}
+
 ###                 ###
 ### Getting serious ###
 ###                 ###
@@ -184,13 +205,21 @@ proc _RAP_entry_format(@UUID, @section, @count) {
     return(colorize(@print));
 }
 
-## Print an entire section
-proc _RAP_print_section(@UUID, @section) {
+## Print an entire section, returns number of records printed
+proc _RAP_print_section(@UUID, @section, @trunc=true) {
     @count = _RAP_count_get(@UUID, @section);
     if (@count > 0) {
+        @start = 1;
+        if (@trunc && @count >= 6) {
+            @start = @count - 3;
+        }
+
         @secTitle = to_upper(@section). 'S';
         msg(colorize("&4--------[ &c@secTitle &4]--------"));
-        for (@i = 1, @i <= @count, @i++) {
+        if (@start > 1) {
+            msg(colorize('&8... (view full rap with /rap <player> full)'));
+        }
+        for (@i = @start, @i <= @count, @i++) {
             msg(_RAP_entry_format(@UUID, @section, @i));
         }
     }
@@ -204,17 +233,24 @@ proc _RAP_print_UUID(@UUID, @args) {
         _error("Expected a valid UUID, got '@UUID'");
     }
 
-    @sections = _RAP_section_list();
-    @AssociatedUsernames = _UUID_usernames_list(@UUID);
-    @total = 0;
+    @params = _RAP_parse_args(@args);
+    @trunc = !@params['full']
 
-    msg(colorize("&eRap sheet for &6@UUID"));
-    msg(colorize('&eKnown usernames: &6'. array_implode(@AssociatedUsernames, '&e, &6')));
-    foreach (@sections, @section) {
-        @total += _RAP_print_section(@UUID, @section);
+    if (@params['sections']) {
+        @sections = @params['sections'];
+    } else {
+        @sections = _RAP_section_list();
     }
 
-    if (@total == 0) {
+    @AssociatedUsernames = _UUID_usernames_list(@UUID);
+    msg(colorize("&eRap sheet for &6@UUID"));
+    msg(colorize('&eKnown usernames: &6'. array_implode(@AssociatedUsernames, '&e, &6')));
+    @printed = 0;
+    foreach (@sections, @section) {
+        @printed += _RAP_print_section(@UUID, @section, @trunc);
+    }
+
+    if (@printed == 0) {
         msg(colorize('&7This UUID has not committed any crimes.'));
     }
 }
@@ -222,7 +258,7 @@ proc _RAP_print_UUID(@UUID, @args) {
 ## Prints the entire rap sheet (Player)
 proc _RAP_print_player(@player, @args) {
     @player = _autocomplete_player(@player, false, true);
-    _RAP_print_UUID(_UUID_player_get(@player, true));
+    _RAP_print_UUID(_UUID_player_get(@player, true), @args);
 }
 
 ###                  ###
@@ -235,9 +271,7 @@ proc _RAP_kick(@player, @info) {
 
     @reason = @info['reason'];
     sudo("/ekick @player @reason");
-    if (_getserver() == 'Survival') {
-        _bc_irc("@player has been kicked for \"@reason\".");
-    }
+    _bc_irc("@player has been kicked for \"@reason\".");
 
     _RAP_entry_append(@UUID, 'kick', @info);
 }
@@ -253,10 +287,7 @@ proc _RAP_mute(@player, @info) {
     } else {
         sudo("/emute @player @length");
     }
-
-    if (_getserver() == 'Survival') {
-        _bc_irc("@player has been muted for @length for \"@reason\".");
-    }
+    _bc_irc("@player has been muted for @length for \"@reason\".");
 
     _RAP_entry_append(@UUID, 'mute', @info);
 }
@@ -277,10 +308,7 @@ proc _RAP_ban(@player, @info) {
     } else {
         sudo("/essentials:tempban @player @length @reason");
     }
-
-    if (_getserver() == 'Survival') {
-        _bc_irc("@player has been banned for @length for \"@reason\".");
-    }
+    _bc_irc("@player has been banned for @length for \"@reason\".");
 
     _RAP_entry_append(@UUID, 'ban', @info);
 }

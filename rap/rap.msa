@@ -88,9 +88,6 @@
     if ($l == '') {
         _error('/tempmute <player> &4<length> <reason>');
     }
-    if (!is_numeric($l[0])) {
-        _error('Mute length must be numeric.');
-    }
     if ($ == '') {
         _error('/tempmute <player> <length> &4<reason>');
     }
@@ -135,9 +132,6 @@
     }
     if ($l == '') {
         _error('/tempban <player> &4<length> <reason>');
-    }
-    if (!is_numeric($l[0])) {
-        _error('Ban length must be numeric.');
     }
     if ($ == '') {
         _error('/tempban <player> <length> &4<reason>');
