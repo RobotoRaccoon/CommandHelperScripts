@@ -72,8 +72,8 @@ proc _MS_start(@args) {
     _MS_setInv(@info);
     ptake_item(array(name:'WOODEN_HOE'));
     set_ploc(player(), array(@c[0] - 2, @c[1] + 1, @c[2] + @gridz/2, 'Event'));
-    set_pmode(player(), CREATIVE);
-    
+    set_pmode(player(), 'CREATIVE');
+
     _MS_storeInfo(@info);
     export('minesweeper.mineslist', _MS_fieldMineList(@info));
     #console("Minesweeper: Generating a @size game for ". player());
@@ -93,7 +93,7 @@ proc _MS_quit(@player) {
         _MS_reset(@arena);
         die(colorize('&cYou have quit &4Minesweeper&c.'));
     }
-    
+
     if(has_permission('ch_staff')) {
         _MS_reset(@arena);
         die(colorize('&cYou have &4forcefully &cended the current round of &4Minesweeper&c.'));
@@ -163,7 +163,7 @@ proc _MS_personalbest(@player=player()) {
     } else {
         @UUID = _UUID_player_altered(@player, true);
     }
-        
+
     @pb = get_value("minesweeper.leader.uuid.@UUID");
     if(!is_array(@pb)) {
         @pb = associative_array();
@@ -180,3 +180,4 @@ proc _MS_personalbest(@player=player()) {
         msg(colorize("&5@size: &f@time"));
     }
 }
+

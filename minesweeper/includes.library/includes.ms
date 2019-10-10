@@ -82,7 +82,7 @@ proc _MS_clear_values(@arena) {
 
     clear_value("minesweeper.arena.@arena");
     export("minesweeper.arena.@arena", null);
-   
+
     clear_value("minesweeper.player.@player");
     export("minesweeper.player.@player", null);
 
@@ -92,7 +92,7 @@ proc _MS_clear_values(@arena) {
 
     if(ponline(@player)) {
         runas(@player, '/warp minesweeper');
-        set_pmode(@player, SURVIVAL);
+        set_pmode(@player, 'SURVIVAL');
     }
 }
 
@@ -137,7 +137,8 @@ proc _MS_grid_getpos(@info, @x, @z) {
 }
 
 proc _MS_genSeed() {
-    return(floor(rand() * pow(10, 10)) + 1);
+#   return(floor(rand() * pow(10, 10)) + 1);
+    return(floor(rand() * (10 ** 10)) + 1);
 }
 
 ### Generate a playing field as a 1D array, to be treated as a 2D. Just allows quicker creation.
@@ -178,7 +179,7 @@ proc _MS_fieldMineList(@info) {
     @z = @info['config']['z'];
     @list = array();
     array_resize(@list, @x*@z, 0);
-    
+
     ### Produce @list[x][z]
     for(@i = 0, @i < @x, @i++) {
         for(@j = 0, @j < @z, @j++) {
@@ -208,11 +209,11 @@ proc _MS_checkwin(@arena) {
     if(@tntcount == @snowcount) {
         @time = time() - _MS_getInfo(@arena, 'time');
         @time = round((@time / 1000), 2);
-        
+
         @size = @cfg['type'];
         @elapse = _MS_timeString(@time);
         broadcast(colorize("&5@player &fbeat a &e@size &flevel of &cMinesweeper&f in &c@elapse!"));
-        
+
         @payout = _MS_payout(@cfg, ceil(@time));
         if(@payout > 0) {
             acc_add(@player, @payout);
@@ -282,13 +283,13 @@ proc _MS_leaderboard_write(@size, @UUID, @time, @force=false) {
     if(!is_array(@leader)) {
         @leader = array()
     }
-    
+
     if(@update || @force) {
         @data = array(@player, @time)
         if(!is_null(@oldTime)) {
             array_remove_values(@leader, array(@player, @oldTime))
         }
-        
+
         @last = array_size(@leader);
         @insert = @last;
         for(@pos = 0, @pos < @last, @pos++) {
@@ -355,7 +356,7 @@ proc _MS_firstArena(@cfg) {
     for(@arena = 0, @arena < _MS_arenaCount(), @arena++) {
         @size = array_normalize(_MS_arenaSize(@arena));
         @custom = array(@cfg['x'], @cfg['z']);
-        
+
         ### Temp
         if(@custom[0] > @size[0] || @custom[1] > @size[1]) {
         #if(max(@custom) > max(@size) || min(@custom) > min(@size)) {
@@ -434,10 +435,10 @@ proc _MS_toggleFlag(@x, @y, @z) {
     switch(@block) {
         case 'AIR':
             @set = 'FLOWER_POT';
-            break;
+            break();
         default:
             @set = 'AIR';
-            break;
+            break();
         ### Have question mark equivalent?
     }
     _MS_setBlock(@x,@y+1,@z,@set);
@@ -461,7 +462,7 @@ proc _MS_colourField(@info, @xpos, @zpos) {
     @cfg = @info['config'];
     @gridx = @cfg['x'];
     @gridz = @cfg['z'];
-    
+
     ### Arena settings
     @minesList = _MS_fieldMineList(@info);
     @c = _MS_gridCorner(@info);
@@ -481,7 +482,7 @@ proc _MS_colourClay(@info, @minesList, @x, @y, @z) {
     if(@block != 'COAL_BLOCK') { ### Clay + Coal
         return();
     }
-    
+
     @cfg = @info['config'];
     @pos = _MS_grid_getpos(@info, @x, @z);
     @xpos = @pos[0];
@@ -505,11 +506,11 @@ proc _MS_colourClay(@info, @minesList, @x, @y, @z) {
 
 proc _MS_shuffleField(@info, @xpos, @zpos) {
     @minesList = _MS_fieldMineList(@info);
-        
+
     @cfg = @info['config'];
     @gridx = @cfg['x'];
     @gridz = @cfg['z'];
-        
+
     #console(@minesList)
     @clicked = @xpos * @gridz + @zpos;
     if(@minesList[@clicked] != 0) {
@@ -535,8 +536,9 @@ proc _MS_shuffleField(@info, @xpos, @zpos) {
                 break(2);
             }
         }
-    
+
         @info['field'] = @field;
     }
     return(@info);
 }
+
