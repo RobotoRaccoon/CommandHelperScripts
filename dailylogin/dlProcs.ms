@@ -29,19 +29,19 @@ proc _dl_add(@player) {
 }
 
 proc _dl_getPayout(@con) {
-    ### Base rates for 7 weeks, 1 week, 1 day
+    ## Base rates for 7 weeks, 1 week, 1 day
     if (@con % 49 == 0) {
         @amount = 50;
     }
     else if (@con % 7 == 0) {
-        @amount = 10;
+        @amount = 15;
     }
     else {
-        @amount = 5;
+        @amount = 10;
     }
 
     @today = _dl_getToday();
-    if (@today == 18255) { ### 2019-12-25
+    if (@today == 18255) { ## 2019-12-25
         @amount += 100;
     }
 

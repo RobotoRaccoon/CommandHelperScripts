@@ -16,10 +16,14 @@
 
     switch(@p1) {
     case '':
+    case '?':
     case 'help':
-        msg(colorize(' &7===== &5Daily Login &7====='));
-        msg(colorize('&5Check &f> &dSee how many days [player] has logged in for'));
-        msg(colorize('&5Top &f> &dView the leaderboards'));
+        @commands = array(
+                '&5Check &f> &dSee how many days [player] has logged in for',
+                '&5Top &f> &dView the leaderboards',
+                '&5Current &f> &dTop, but sorted by current streak'
+            );
+         _page_vertical('Daily Login', 'dailylogin help', @commands, @p2);
 
     case 'check':
         if (@p2 == '') {
