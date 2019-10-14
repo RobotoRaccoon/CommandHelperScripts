@@ -93,6 +93,7 @@ proc _MS_clear_values(@arena) {
     if(ponline(@player)) {
         runas(@player, '/warp minesweeper');
         set_pmode(@player, 'SURVIVAL');
+        clear_pinv(@player);
     }
 }
 
@@ -253,20 +254,20 @@ proc _MS_leaderboard_write(@size, @UUID, @time, @force=false) {
     @player = _UUID_usernames_lastname(@UUID);
     @UUID = _UUID_altered(@UUID);
 
-    if(@size == 'custom') {
+    if (@size == 'custom') {
         return();
     }
-    
-    ### Personal insert ###
+
+    ## Personal insert ##
     @personal = get_value("minesweeper.leader.uuid.@UUID");
-    if(is_null(@personal)) {
+    if (is_null(@personal)) {
         @personal = associative_array();
     }
 
     @oldTime = null;
     @update = false;
 
-    if(!array_index_exists(@personal, @size)) {
+    if (!array_index_exists(@personal, @size)) {
         @personal[@size] = @time;
         @update = true;
     } else {
@@ -278,13 +279,13 @@ proc _MS_leaderboard_write(@size, @UUID, @time, @force=false) {
     }
     store_value("minesweeper.leader.uuid.@UUID", @personal);
 
-    ### Leaderboard insert ###
+    ## Leaderboard insert ##
     @leader = get_value("minesweeper.leader.size.@size");
-    if(!is_array(@leader)) {
+    if (!is_array(@leader)) {
         @leader = array()
     }
 
-    if(@update || @force) {
+    if (@update || @force) {
         @data = array(@player, @time)
         if(!is_null(@oldTime)) {
             array_remove_values(@leader, array(@player, @oldTime))
@@ -336,8 +337,8 @@ proc _MS_calculateSnow(@arena) {
 }
 
 proc _MS_clayColours() {
-    ### Last element is 9 in radius, including self.
-    ### Additional 10 count (In case randomisation is already at 9)
+    ## Last element is 9 in radius, including self.
+    ## Additional 10 count (In case randomisation is already at 9)
     return(array(
         'WHITE_TERRACOTTA',
         'LIGHT_BLUE_TERRACOTTA',
@@ -357,7 +358,7 @@ proc _MS_firstArena(@cfg) {
         @size = array_normalize(_MS_arenaSize(@arena));
         @custom = array(@cfg['x'], @cfg['z']);
 
-        ### Temp
+        ## Temp - Have to allow for auto-orienting arenas first
         if(@custom[0] > @size[0] || @custom[1] > @size[1]) {
         #if(max(@custom) > max(@size) || min(@custom) > min(@size)) {
             continue();
@@ -378,7 +379,6 @@ proc _MS_firstArena(@cfg) {
 }
 
 proc _MS_explode(@arena, @info, @x, @y, @z) {
-    _MS_setInv(@info);
     _MS_clear_values(@arena);
     @time = round((time() - @info['time']) / 1000, 2);
     @elapse = _MS_timeString(@time);
@@ -386,6 +386,10 @@ proc _MS_explode(@arena, @info, @x, @y, @z) {
     _MS_setBlock(@x, @y, @z, 'TNT');
     _MS_setBlock(@x, @y-1, @z, 'TNT');
 }
+
+###                   ###
+### Inventory Manager ###
+###                   ###
 
 proc _MS_setInv(@info) {
     @player = @info['player'];
@@ -398,24 +402,28 @@ proc _MS_setInv(@info) {
     @inv[5] = null;
     @inv[6] = null;
     @inv[7] = null;
-    @inv[8] = null;
+    @inv[8] = _MS_invSnow(@info);
     set_pinv(@player, @inv);
 }
 
 proc _MS_updateInv(@info) {
-    @cfg = @info['config'];
-
     @player = @info['player'];
+    @inv = associative_array();
+    @inv[8] = _MS_invSnow(@info);
+    set_pinv(@player, @inv);
+}
+
+proc _MS_invSnow(@info) {
+    @cfg = @info['config'];
     @arena = @info['arena'];
 
     @snowLeft = _MS_getSnow(@arena) - @cfg['mines'];
-    if(@snowLeft > 64) {
-        @snowLeft = 0;
+    @snowQty = @snowLeft;
+    if (@snowQty > 64) {
+        @snowQty = 1;
     }
 
-    @inv = associative_array();
-    @inv[1] = array(name: 'SNOW_BLOCK', qty: @snowLeft, meta: array(display: colorize('&3Remaining Snow')));
-    set_pinv(@player, @inv);
+    return(array(name: 'SNOW_BLOCK', qty: @snowQty, meta: array(display: colorize("&3Remaining Snow: &b@snowLeft"))));
 }
 
 ###                ###
@@ -479,7 +487,7 @@ proc _MS_colourField(@info, @xpos, @zpos) {
 
 proc _MS_colourClay(@info, @minesList, @x, @y, @z) {
     @block = _MS_getBlock(@x, @y, @z);
-    if(@block != 'COAL_BLOCK') { ### Clay + Coal
+    if (@block != 'COAL_BLOCK') { ### Clay + Coal
         return();
     }
 
@@ -513,7 +521,7 @@ proc _MS_shuffleField(@info, @xpos, @zpos) {
 
     #console(@minesList)
     @clicked = @xpos * @gridz + @zpos;
-    if(@minesList[@clicked] != 0) {
+    if (@minesList[@clicked] != 0) {
 
         @field = @info['field'];
         ### Search entire field for first 0, ignoring edges.
