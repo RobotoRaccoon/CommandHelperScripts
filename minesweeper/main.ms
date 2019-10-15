@@ -9,13 +9,13 @@
 include('includes.library/includes.ms');
 include('includes.library/commands.ms');
 
-bind('player_interact', null, null, @event,
+bind('player_interact', null, null, @event) {
     if (pworld() != 'Event' || !array_contains_ic(sk_regions_at(ploc()), 'mine-whole')) {
         die();
     }
 
     @player = @event['player'];
-    if(!_MS_isPlaying(@player)) {
+    if (!_MS_isPlaying(@player)) {
         die();
     }
 
@@ -30,7 +30,7 @@ bind('player_interact', null, null, @event,
         @clicks++;
         @max = 3;
 
-        if(@clicks > @max) {
+        if (@clicks > @max) {
             @arena = _MS_getArena(@player);
             _MS_reset(@arena);
             msg(colorize('&4BZZT. &cYou have been kicked for attempted cheating. Do not attempt to break the floor.'));
@@ -41,25 +41,25 @@ bind('player_interact', null, null, @event,
 
         cancel();
     }
-    else if(@event['action'] == 'right_click_block' && @validBlock) {
+    else if (@event['action'] == 'right_click_block' && @validBlock) {
         @loc = @event['location'];
         _MS_toggleFlag(@loc['x'], @y+1, @loc['z']);
         cancel();
     }
-)
+}
 
-bind('block_break', null, null, @event,
-    if(pworld() != 'Event') {
+bind('block_break', null, null, @event) {
+    if (pworld() != 'Event') {
         die()
     }
 
     @loc = @event['location']
-    if(!array_contains_ic(sk_regions_at(@loc), 'mine-snow')) {
+    if (!array_contains_ic(sk_regions_at(@loc), 'mine-snow')) {
         die();
     }
 
     @player = @event['player'];
-    if(!_MS_isPlaying(@player)) {
+    if (!_MS_isPlaying(@player)) {
         cancel()
         _error('You are not currently playing.')
 
@@ -67,12 +67,12 @@ bind('block_break', null, null, @event,
 
     @block = @event['block'];
     @validBlock = array_contains(array('SNOW_BLOCK', 'FLOWER_POT'), @block);
-    if(!@validBlock) {
+    if (!@validBlock) {
         cancel();
         die();
     }
 
-    if(@block != 'SNOW_BLOCK') {
+    if (@block != 'SNOW_BLOCK') {
         die();
     }
 
@@ -87,18 +87,18 @@ bind('block_break', null, null, @event,
     @xpos = @pos[0];
     @zpos = @pos[1];
 
-    ### If this is the first break
-    if(_MS_getSnow(@arena) == array_size(@field)) {
+    ## If this is the first break
+    if (_MS_getSnow(@arena) == array_size(@field)) {
         @info = _MS_shuffleField(@info, @xpos, @zpos);
 
-        ### Colour the rest of the field
+        ## Colour the rest of the field
         _MS_colourField(@info, @xpos, @zpos);
 
         @info['time'] = time(); ### Start time now
         _MS_storeInfo(@info);
     }
 
-    if(_MS_isMine(@info, @xpos, @zpos)) {
+    if (_MS_isMine(@info, @xpos, @zpos)) {
         cancel();
         _MS_explode(@arena, @info, @x, @y, @z);
     } else {
@@ -107,20 +107,20 @@ bind('block_break', null, null, @event,
         _MS_updateInv(@info);
         _MS_checkwin(@arena, true);
     }
-)
+}
 
-bind('block_place', null, null, @event,
-    if(pworld() != 'Event') {
+bind('block_place', null, null, @event) {
+    if (pworld() != 'Event') {
         die();
     }
 
     @loc = @event['location'];
-    if(!array_contains_ic(sk_regions_at(@loc), 'mine-snow')) {
+    if (!array_contains_ic(sk_regions_at(@loc), 'mine-snow')) {
         die();
     }
 
     @player = @event['player'];
-    if(!_MS_isPlaying(@player)) {
+    if (!_MS_isPlaying(@player)) {
         cancel();
         _error('You are not currently playing.');
     }
@@ -128,11 +128,11 @@ bind('block_place', null, null, @event,
     @cy = _MS_corner(_MS_getArena(@player))[1];
     @block = @event['block'];
     @against = @event['against'];
-    if(@loc['y'] != @cy + 2 || @block != 'FLOWER_POT' || @against != 'SNOW_BLOCK') {
+    if (@loc['y'] != @cy + 2 || @block != 'FLOWER_POT' || @against != 'SNOW_BLOCK') {
         cancel();
         _error('You can only place flower pots on snow.')
     }
-)
+}
 
 ###                         ###
 ### Shouldn't need to touch ###
@@ -144,7 +144,7 @@ bind('inventory_click', null, null, @event) {
     }
 
     @player = @event['player'];
-    if(_MS_isPlaying(@player)) {
+    if (_MS_isPlaying(@player)) {
         cancel();
     }
 }
@@ -155,8 +155,13 @@ bind('item_held', null, null, @event) {
     }
 
     @player = @event['player'];
-    if(_MS_isPlaying(@player)) {
-        modify_event('to', 0);
+    ## Only allow first two slots to be selected
+    if (_MS_isPlaying(@player) && @event['to'] > 1) {
+        @from = @event['from'];
+        if (@from > 1) {
+            @from = 0;
+        }
+        modify_event('to', @from);
     }
 }
 
@@ -174,7 +179,7 @@ bind('player_teleport', null, null, @event) {
 }
 
 bind('player_quit', null, null, @event) {
-    if(_MS_isPlaying(@event['player'])) {
+    if (_MS_isPlaying(@event['player'])) {
         @arena = _MS_getArena(@event['player']);
         _MS_clear_values(@arena);
     }

@@ -7,14 +7,7 @@
 
 ### CodebotoCodecoon ###
 
-### TODO:
-# Try and fix the item_held bind.
-
 *:/mines [$] = >>>
-    if (player() == 'radfme') {
-        _error('Minesweeper is down');
-    }
-
     include('includes.library/includes.ms');
     include('includes.library/commands.ms');
 
@@ -44,16 +37,16 @@
 
     case 'top':
         _MS_leaderboard_read(@args)
-        
+
     case 'personalbest':
     case 'pb':
         if(array_size(@args) > 0) {
             @player = _autocomplete_player(@args[0]);
         }
         _MS_personalbest(@player);
-       
+
     case 'pack':
-        msg(colorize('&3Download the Minesweeper Resource Pack: &bhttp://bit.ly/2o36csc'));
+        msg(colorize('&3Download the Minesweeper Resource Pack: &bhttp://bit.ly/2O6i8dS')); #2o36csc - old version
 
     default:
         _error('Unrecognised command. See /mines help');
@@ -113,18 +106,18 @@
 
         @cfg = array_keys(_MS_config());
         array_remove_values(@cfg, 'custom');
-        
+
         foreach(@size in @cfg) {
-   
+
             @oldSize = to_upper(substr(@size, 0, 1)). substr(@size, 1);
             clear_value("minesweeper.leader.@oldSize")
             clear_value("minesweeper.leader.size.@size")
-                
+
             @all = get_values('minesweeper.leader.uuid.')
             @keys = array_keys(@all)
 
             foreach(@keys as @key) {
-    
+
                 if(array_index_exists(@all[@key], @size)) {
                     @time = @all[@key][@size];
                     @uuid = split('.', @key)[3];
@@ -169,4 +162,3 @@
         msg('Cleared something...')
     }
 <<<
-

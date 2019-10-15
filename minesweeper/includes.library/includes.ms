@@ -5,7 +5,7 @@
 #                       #
 #########################
 
-### The smallest valued corner for the field. (Larger negatives are smaller, of course)
+## The smallest valued corner for the field. (Larger negatives are smaller, of course)
 proc _MS_corner(@arena) {
     return(_MS_arenas()[@arena]['corner']);
 }
@@ -15,13 +15,13 @@ proc _MS_arenaSize(@arena) {
 }
 
 proc _MS_arenas() {
-        @arenas = array(
-            array('corner': array(-1380, 3, 1440), 'size': array('x': 30, 'z': 16)),
-            array('corner': array(-1379, 3, 1484), 'size': array('x': 10, 'z': 10)),
-            array('corner': array(-1361, 3, 1484), 'size': array('x': 10, 'z': 10)),
-            array('corner': array(-1380, 3, 1462), 'size': array('x': 30, 'z': 16)),
-            array('corner': array(-1461, 3, 1440), 'size': array('x': 54, 'z': 54)),
-        );
+    @arenas = array(
+        array('corner': array(-1380, 3, 1440), 'size': array('x': 30, 'z': 16)),
+        array('corner': array(-1379, 3, 1484), 'size': array('x': 10, 'z': 10)),
+        array('corner': array(-1361, 3, 1484), 'size': array('x': 10, 'z': 10)),
+        array('corner': array(-1380, 3, 1462), 'size': array('x': 30, 'z': 16)),
+        array('corner': array(-1461, 3, 1440), 'size': array('x': 54, 'z': 54)),
+    );
     return(@arenas);
 }
 
@@ -29,7 +29,7 @@ proc _MS_arenaCount() {
     return(array_size(_MS_arenas()));
 }
 
-### Pre-defined level sizes
+## Pre-defined level sizes
 proc _MS_config(@size=null) {
     @config = array(
         'small':    array('x': 10, 'z': 10, 'mines': 12, 'mult': 1,  'type': 'small'),
@@ -39,11 +39,11 @@ proc _MS_config(@size=null) {
         'custom':   array('x': 30, 'z': 16, 'mines':  0, 'mult': 0,  'type': 'custom'),
     );
 
-    ### Return entire array if no size specified.
-    if(@size == null) {
+    ## Return entire array if no size specified.
+    if (@size == null) {
         return(@config);
     }
-    if(array_index_exists(@config, @size)) {
+    if (array_index_exists(@config, @size)) {
         return(@config[@size]);
     }
     array_remove(@config, 'custom');
@@ -51,14 +51,14 @@ proc _MS_config(@size=null) {
 }
 
 proc _MS_assertConfig(@cfg) {
-    if(@cfg['x'] <= 0) { _error('Grid size x must be positive'); }
-    if(@cfg['z'] <= 0) { _error('Grid size z must be positive'); }
-    if(@cfg['mines'] <= 0) { _error('Mines count must be positive'); }
+    if (@cfg['x'] <= 0) { _error('Grid size x must be positive'); }
+    if (@cfg['z'] <= 0) { _error('Grid size z must be positive'); }
+    if (@cfg['mines'] <= 0) { _error('Mines count must be positive'); }
     @size = @cfg['x'] * @cfg['z'];
-    if(@cfg['mines'] > @size) { _error('Mines count must fit in grid'); }
+    if (@cfg['mines'] > @size) { _error('Mines count must fit in grid'); }
 }
 
-### Get the smallest valued corner for the specified config.
+## Get the smallest valued corner for the specified config.
 proc _MS_gridCorner(@info) {
     @cfg = @info['config'];
     @size = _MS_arenaSize(@info['arena']);
@@ -71,7 +71,7 @@ proc _MS_gridCorner(@info) {
 proc _MS_reset(@arena=0) {
     _MS_clear_values(@arena)
 
-    ### Clear clay, snow, markers
+    ## Clear clay, snow, markers
     _MS_setFloor(@arena, 'AIR');
     _MS_setFloor(@arena, 'AIR', 2);
     _MS_setFloor(@arena, 'AIR', 1);
@@ -86,11 +86,11 @@ proc _MS_clear_values(@arena) {
     clear_value("minesweeper.player.@player");
     export("minesweeper.player.@player", null);
 
-    ### Temp saved data
+    ## Temp saved data
     export("minesweeper.cheatclicks.@player", null);
     export("minesweeper.snow.@arena", null);
 
-    if(ponline(@player)) {
+    if (ponline(@player)) {
         runas(@player, '/warp minesweeper');
         set_pmode(@player, 'SURVIVAL');
         clear_pinv(@player);
@@ -106,11 +106,11 @@ proc _MS_storeInfo(@info) {
 
 proc _MS_getInfo(@arena, @setting=null) {
     @info = _import_get("minesweeper.arena.@arena");
-    if(is_null(@setting)) {
+    if (is_null(@setting)) {
         return(@info);
     }
 
-    if(is_array(@info) && array_index_exists(@info, @setting)) {
+    if (is_array(@info) && array_index_exists(@info, @setting)) {
         return(@info[@setting]);
     }
 
@@ -125,7 +125,7 @@ proc _MS_isPlaying(@player=player()) {
     return(!is_null(_MS_getArena(@player)));
 }
 
-### Convert coordinates into grid locations
+## Convert coordinates into grid locations
 proc _MS_grid_getpos(@info, @x, @z) {
     @c = _MS_corner(@info['arena']);
     @size = _MS_arenaSize(@info['arena']);
@@ -138,16 +138,15 @@ proc _MS_grid_getpos(@info, @x, @z) {
 }
 
 proc _MS_genSeed() {
-#   return(floor(rand() * pow(10, 10)) + 1);
     return(floor(rand() * (10 ** 10)) + 1);
 }
 
-### Generate a playing field as a 1D array, to be treated as a 2D. Just allows quicker creation.
+## Generate a playing field as a 1D array, to be treated as a 2D. Just allows quicker creation.
 proc _MS_generate_field(@x, @z, @mines, @seed) {
     @field = array();
     array_resize(@field, @x * @z - @mines, false);
 
-    for(@i = 0, @i < @mines, @i++) {
+    for (@i = 0, @i < @mines, @i++) {
         @index = @seed % array_size(@field);
         array_insert(@field, true, @index);
     }
@@ -159,7 +158,7 @@ proc _MS_isMine(@info, @x, @z) {
     return(@info['field'][@x * @gridz + @z]);
 }
 
-### Get the number of mines in the radius. @x and @z are grid indices.
+## Get the number of mines in the radius. @x and @z are grid indices.
 #proc _MS_minesInRadius(@info, @field, @x, @z) {
 #    @gridx = @info['config']['x'];
 #    @gridz = @info['config']['y'];
@@ -181,16 +180,17 @@ proc _MS_fieldMineList(@info) {
     @list = array();
     array_resize(@list, @x*@z, 0);
 
-    ### Produce @list[x][z]
-    for(@i = 0, @i < @x, @i++) {
-        for(@j = 0, @j < @z, @j++) {
+    ## Produce @list[x][z]
+    for (@i = 0, @i < @x, @i++) {
+        for (@j = 0, @j < @z, @j++) {
             if(!_MS_isMine(@info, @i, @j)) {
                 continue();
             }
 
-            for(@i2 = @i-1, @i2 <= @i+1, @i2++) {
-                for(@j2 = @j-1, @j2 <= @j+1, @j2++) {
-                    if(@i2 >= 0 && @i2 < @x && @j2 >= 0 && @j2 < @z) {
+            ## We're a mine, increment the surrounding area by 1
+            for (@i2 = @i-1, @i2 <= @i+1, @i2++) {
+                for (@j2 = @j-1, @j2 <= @j+1, @j2++) {
+                    if (@i2 >= 0 && @i2 < @x && @j2 >= 0 && @j2 < @z) {
                         @list[@i2 * @z + @j2]++;
                     }
                 }
@@ -207,7 +207,7 @@ proc _MS_checkwin(@arena) {
     @tntcount = @cfg['mines'];
 
     @snowcount = _MS_getSnow(@arena);
-    if(@tntcount == @snowcount) {
+    if (@tntcount == @snowcount) {
         @time = time() - _MS_getInfo(@arena, 'time');
         @time = round((@time / 1000), 2);
 
@@ -216,7 +216,7 @@ proc _MS_checkwin(@arena) {
         broadcast(colorize("&5@player &fbeat a &e@size &flevel of &cMinesweeper&f in &c@elapse!"));
 
         @payout = _MS_payout(@cfg, ceil(@time));
-        if(@payout > 0) {
+        if (@payout > 0) {
             acc_add(@player, @payout);
             msg(colorize("&a$@payout has been added to your account!"));
         }
@@ -293,8 +293,8 @@ proc _MS_leaderboard_write(@size, @UUID, @time, @force=false) {
 
         @last = array_size(@leader);
         @insert = @last;
-        for(@pos = 0, @pos < @last, @pos++) {
-            if(@time < @leader[@pos][1]) {
+        for (@pos = 0, @pos < @last, @pos++) {
+            if (@time < @leader[@pos][1]) {
                 @insert = @pos;
                 break();
             }
@@ -308,7 +308,7 @@ proc _MS_leaderboard_write(@size, @UUID, @time, @force=false) {
 
 proc _MS_getSnow(@arena) {
     @snow = import("minesweeper.snow.@arena");
-    if(@snow == null || @snow < 1) {
+    if (@snow == null || @snow < 1) {
         _MS_resetSnow(@arena);
     }
     return(import("minesweeper.snow.@arena"));
@@ -326,9 +326,9 @@ proc _MS_calculateSnow(@arena) {
 
     @snow = 0;
     @y = @c[1] + 1;
-    for(@x = @c[0], @x < @c[0] + @size['x'], @x++) {
-        for(@z = @c[2], @z < @c[2] + @size['z'], @z++) {
-            if(_MS_getBlock(@x,@y,@z) == 'SNOW_BLOCK') {
+    for (@x = @c[0], @x < @c[0] + @size['x'], @x++) {
+        for (@z = @c[2], @z < @c[2] + @size['z'], @z++) {
+            if (_MS_getBlock(@x,@y,@z) == 'SNOW_BLOCK') {
                 @snow++;
             }
         }
@@ -354,27 +354,26 @@ proc _MS_clayColours() {
 }
 
 proc _MS_firstArena(@cfg) {
-    for(@arena = 0, @arena < _MS_arenaCount(), @arena++) {
+    for (@arena = 0, @arena < _MS_arenaCount(), @arena++) {
         @size = array_normalize(_MS_arenaSize(@arena));
         @custom = array(@cfg['x'], @cfg['z']);
 
         ## Temp - Have to allow for auto-orienting arenas first
-        if(@custom[0] > @size[0] || @custom[1] > @size[1]) {
+        if (@custom[0] > @size[0] || @custom[1] > @size[1]) {
         #if(max(@custom) > max(@size) || min(@custom) > min(@size)) {
             continue();
         }
 
         @info = _MS_getInfo(@arena);
-        if(!is_array(@info)) {
+        if (!is_array(@info)) {
             return(@arena);
         }
 
         @player = @info['player'];
-        if(!ponline(@player) || !array_contains_ic(sk_current_regions(@player), 'mine-whole')) {
+        if (!ponline(@player) || !array_contains_ic(sk_current_regions(@player), 'mine-whole')) {
             return(@arena);
         }
     }
-
     _error('There are no available arenas...');
 }
 
@@ -441,13 +440,13 @@ proc _MS_setBlock(@x, @y, @z, @block) {
 proc _MS_toggleFlag(@x, @y, @z) {
     @block =  _MS_getBlock(@x, @y+1, @z);
     switch(@block) {
-        case 'AIR':
-            @set = 'FLOWER_POT';
-            break();
-        default:
-            @set = 'AIR';
-            break();
-        ### Have question mark equivalent?
+    case 'AIR':
+        @set = 'FLOWER_POT';
+        break();
+    default:
+        @set = 'AIR';
+        break();
+    ### Have question mark equivalent?
     }
     _MS_setBlock(@x,@y+1,@z,@set);
 }
@@ -459,8 +458,8 @@ proc _MS_setFloor(@arena, @block, @adjust=0) {
     @cz = @c[2];
 
     @y = @c[1] + @adjust;
-    for(@x = @cx, @x < @cx + @size['x'], @x++) {
-        for(@z = @cz, @z < @cz + @size['z'], @z++) {
+    for (@x = @cx, @x < @cx + @size['x'], @x++) {
+        for (@z = @cz, @z < @cz + @size['z'], @z++) {
             _MS_setBlock(@x,@y,@z,@block);
         }
     }
@@ -478,8 +477,8 @@ proc _MS_colourField(@info, @xpos, @zpos) {
 
     @lastx = @c[0] + @gridx;
     @lastz = @c[2] + @gridz;
-    for(@x = @c[0], @x < @lastx, @x++) {
-        for(@z = @c[2], @z < @lastz, @z++) {
+    for (@x = @c[0], @x < @lastx, @x++) {
+        for (@z = @c[2], @z < @lastz, @z++) {
             _MS_colourClay(@info, @minesList, @x, @y, @z);
         }
     }
@@ -524,11 +523,11 @@ proc _MS_shuffleField(@info, @xpos, @zpos) {
     if (@minesList[@clicked] != 0) {
 
         @field = @info['field'];
-        ### Search entire field for first 0, ignoring edges.
-        for(@i = 1, @i < @gridx-1, @i++) {
-            for(@j = 1, @j < @gridz-1, @j++) {
+        ## Search entire field for first 0, ignoring edges.
+        for (@i = 1, @i < @gridx-1, @i++) {
+            for (@j = 1, @j < @gridz-1, @j++) {
                 @found = @i * @gridz + @j;
-                if(@minesList[@found] != 0) {
+                if (@minesList[@found] != 0) {
                     continue();
                 }
 
@@ -536,7 +535,7 @@ proc _MS_shuffleField(@info, @xpos, @zpos) {
                 @s = array_size(@field);
 
                 @adjust = @found-@clicked;
-                if(@adjust < 0) {
+                if (@adjust < 0) {
                     @adjust += @s;
                 }
                 @field = array_merge(@field[cslice(@adjust, @s-1)],
@@ -549,4 +548,3 @@ proc _MS_shuffleField(@info, @xpos, @zpos) {
     }
     return(@info);
 }
-
