@@ -19,13 +19,13 @@ bind('player_interact', null, null, @event) {
         die();
     }
 
-    @arena = _MS_getArena(@player);
-    @y = _MS_corner(@arena)[1];
     @validBlock = array_contains(array('SNOW_BLOCK', 'FLOWER_POT'), @event['block']);
     if (@event['action'] == 'left_click_block' && !@validBlock) {
+        cancel();
+
         @clicks = import("minesweeper.cheatclicks.@player");
         if (is_null(@clicks)) {
-            @click = 0;
+            @clicks = 0;
         }
         @clicks++;
         @max = 3;
@@ -33,18 +33,15 @@ bind('player_interact', null, null, @event) {
         if (@clicks > @max) {
             @arena = _MS_getArena(@player);
             _MS_reset(@arena);
-            msg(colorize('&4BZZT. &cYou have been kicked for attempted cheating. Do not attempt to break the floor.'));
+            msg(colorize('&4BZZT. &cYou have been kicked for attempted cheating\nDo not attempt to break the floor'));
         } else {
-            msg(colorize("&cDo not break anything but snow and flowerpots. Continued breakage will result in your match being cancelled."))
+            msg(colorize('&4Do not break anything but snow and flowerpots\n&cContinued attempts will result in your match being cancelled'));
             export("minesweeper.cheatclicks.@player", @clicks);
         }
-
-        cancel();
     }
-    else if (@event['action'] == 'right_click_block' && @validBlock) {
-        @loc = @event['location'];
-        _MS_toggleFlag(@loc['x'], @y+1, @loc['z']);
+    else if (@event['action'] == 'right_click_block') {
         cancel();
+        _MS_rightClick(@event);
     }
 }
 
@@ -88,13 +85,13 @@ bind('block_break', null, null, @event) {
     @zpos = @pos[1];
 
     ## If this is the first break
-    if (_MS_getSnow(@arena) == array_size(@field)) {
+    if (@info['time'] == null) {
         @info = _MS_shuffleField(@info, @xpos, @zpos);
 
         ## Colour the rest of the field
         _MS_colourField(@info, @xpos, @zpos);
 
-        @info['time'] = time(); ### Start time now
+        @info['time'] = time(); ## Start time now
         _MS_storeInfo(@info);
     }
 
@@ -103,9 +100,7 @@ bind('block_break', null, null, @event) {
         _MS_explode(@arena, @info, @x, @y, @z);
     } else {
         #_MS_setBlock(@x, @y, @z, 'AIR');
-        _MS_decreaseSnow(@arena);
-        _MS_updateInv(@info);
-        _MS_checkwin(@arena, true);
+        _MS_snowBroken(@arena, @info, @x, @y, @z);
     }
 }
 

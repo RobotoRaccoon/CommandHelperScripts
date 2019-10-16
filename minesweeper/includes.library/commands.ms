@@ -54,7 +54,7 @@ proc _MS_start(@args) {
     }
 
     @field = _MS_generate_field(@gridx, @gridz, @mines, @seed);
-    @info = array('player': player(), 'arena': @arena, 'config': @cfg, 'field': @field, 'seed': @seed, 'time': time());
+    @info = array('player': player(), 'arena': @arena, 'config': @cfg, 'field': @field, 'seed': @seed, 'time': null);
 
     @c = _MS_gridCorner(@info);
     ## Set clay and snow

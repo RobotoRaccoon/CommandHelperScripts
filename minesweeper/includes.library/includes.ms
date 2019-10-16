@@ -394,7 +394,7 @@ proc _MS_setInv(@info) {
     @player = @info['player'];
     @inv = associative_array();
     @inv[0] = array(name: 'FLOWER_POT', meta: array(display: colorize('&3Flag')));
-    @inv[1] = null;
+    @inv[1] = _MS_invShovel();
     @inv[2] = null;
     @inv[3] = null;
     @inv[4] = null;
@@ -412,6 +412,15 @@ proc _MS_updateInv(@info) {
     set_pinv(@player, @inv);
 }
 
+proc _MS_invShovel() {
+    @lore = array(
+        colorize('&fRight-click a snow block to'),
+        colorize('&fsee if it is a mine for a'),
+        colorize('&b30 second time penalty')
+    );
+    return(array(name: 'GOLDEN_SHOVEL', meta: array(display: colorize('&3The Decider'), lore: @lore)));
+}
+
 proc _MS_invSnow(@info) {
     @cfg = @info['config'];
     @arena = @info['arena'];
@@ -425,9 +434,9 @@ proc _MS_invSnow(@info) {
     return(array(name: 'SNOW_BLOCK', qty: @snowQty, meta: array(display: colorize("&3Remaining Snow: &b@snowLeft"))));
 }
 
-###                ###
-### Arena creators ###
-###                ###
+###                 ###
+### Arena modifiers ###
+###                 ###
 
 proc _MS_getBlock(@x, @y, @z) {
     return(get_block(array(x:@x, y:@y, z:@z, world:'Event')));
@@ -437,6 +446,60 @@ proc _MS_setBlock(@x, @y, @z, @block) {
     set_block(array(x:@x, y:@y, z:@z, world:'Event'), @block);
 }
 
+## player_interact event - already cancelled before we get to this method
+proc _MS_rightClick(@event) {
+    ## Right-clicking with nothing does nothing
+    if (is_null(@event['item'])) {
+        return();
+    }
+
+    @player = @event['player'];
+    @arena = _MS_getArena(@player);
+    @info = _MS_getInfo(@arena);
+
+    ## If the arena has not started, don't do anything
+    if (@info['time'] == null) {
+        return();
+    }
+
+    @loc = @event['location'];
+    @x = integer(@loc['x']);
+    @y = _MS_corner(@arena)[1] + 1; ## Snow layer Y
+    @z = integer(@loc['z']);
+
+    @holding = @event['item']['name'];
+    @clicked = @event['block'];
+
+    switch(@holding) {
+    case 'FLOWER_POT':
+        if (@clicked == 'SNOW_BLOCK' || @clicked == 'FLOWER_POT') {
+            ## Toggle the flag
+            _MS_toggleFlag(@x, @y, @z);
+        }
+        break();
+
+    case 'GOLDEN_SHOVEL':
+        if (@clicked == 'SNOW_BLOCK') {
+            ## Remove a single shovel
+            ptake_item(@player, array(name: @holding, qty: 1));
+
+            ## 30 second penalty (subtract 30,000ms from start time)
+            @info['time'] -= 30000;
+             _MS_storeInfo(@info);
+
+            @pos = _MS_grid_getpos(@info, @x, @z);
+            if (_MS_isMine(@info, @pos[0], @pos[1])) {
+                _MS_setBlock(@x, @y+1, @z, 'FLOWER_POT');
+            } else {
+                _MS_setBlock(@x, @y, @z, 'AIR');
+                _MS_snowBroken(@arena, @info, @x, @y, @z);
+            }
+        }
+        break();
+    }
+}
+
+## x,y,z of the snow block
 proc _MS_toggleFlag(@x, @y, @z) {
     @block =  _MS_getBlock(@x, @y+1, @z);
     switch(@block) {
@@ -446,9 +509,16 @@ proc _MS_toggleFlag(@x, @y, @z) {
     default:
         @set = 'AIR';
         break();
-    ### Have question mark equivalent?
+    ## Have question mark equivalent?
     }
     _MS_setBlock(@x,@y+1,@z,@set);
+}
+
+proc _MS_snowBroken(@arena, @info, @x, @y, @z) {
+    _MS_setBlock(@x, @y+1, @z, 'AIR');
+    _MS_decreaseSnow(@arena);
+    _MS_updateInv(@info);
+    _MS_checkwin(@arena, true);
 }
 
 proc _MS_setFloor(@arena, @block, @adjust=0) {
