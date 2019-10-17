@@ -76,10 +76,16 @@ proc _dl_getDiff(@UUID) {
 }
 
 proc _dl_addAmount(@player, @amount, @con) {
-    acc_add(@player, @amount);
-    tmsg(@player, colorize("&a$@amount has been added to your account for logging in today"));
-    if (@con > 1) {
-        tmsg(@player, colorize("&aYou have logged in for @con consecutive days!"));
+    ## As this is called inside a closure, the player may no longer be online & we don't want to error
+    if (ponline(@player)) {
+        acc_add(@player, @amount);
+        tmsg(@player, colorize("&a$@amount has been added to your account for logging in today"));
+        if (@con > 1) {
+            tmsg(@player, colorize("&aYou have logged in for @con consecutive days!"));
+        }
+    } else {
+        ## This is not the default option as it logs in console
+        runas('~console', "/eco give @player @amount");
     }
 }
 
