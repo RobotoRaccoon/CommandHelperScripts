@@ -271,7 +271,7 @@ proc _MS_leaderboard_write(@size, @UUID, @time, @force=false) {
         @personal[@size] = @time;
         @update = true;
     } else {
-        if(@time <= @personal[@size]) {
+        if (@time <= @personal[@size]) {
             @oldTime = @personal[@size];
             @personal[@size] = @time;
             @update = true;
@@ -287,10 +287,11 @@ proc _MS_leaderboard_write(@size, @UUID, @time, @force=false) {
 
     if (@update || @force) {
         @data = array(@player, @time)
-        if(!is_null(@oldTime)) {
+        if (!is_null(@oldTime)) {
             array_remove_values(@leader, array(@player, @oldTime))
         }
 
+        ## TODO binary insertion
         @last = array_size(@leader);
         @insert = @last;
         for (@pos = 0, @pos < @last, @pos++) {
@@ -301,7 +302,7 @@ proc _MS_leaderboard_write(@size, @UUID, @time, @force=false) {
         }
 
         array_insert(@leader, @data, @insert);
-        broadcast(colorize("&5@player &fachieved position &c". (@insert + 1). " &fon a &e@size &flevel of &cMinesweeper."));
+        _bc("&5@player &fachieved position &c". (@insert + 1). " &fon a &e@size &flevel of &cMinesweeper.");
         store_value("minesweeper.leader.size.@size", @leader);
     }
 }
@@ -540,7 +541,7 @@ proc _MS_colourField(@info, @xpos, @zpos) {
     @gridx = @cfg['x'];
     @gridz = @cfg['z'];
 
-    ### Arena settings
+    ## Arena settings
     @minesList = _MS_fieldMineList(@info);
     @c = _MS_gridCorner(@info);
     @y = @c[1];
@@ -556,7 +557,9 @@ proc _MS_colourField(@info, @xpos, @zpos) {
 
 proc _MS_colourClay(@info, @minesList, @x, @y, @z) {
     @block = _MS_getBlock(@x, @y, @z);
-    if (@block != 'COAL_BLOCK') { ### Clay + Coal
+    ## Ignore already coloured blocks
+    ## TODO better, as getting the block is probably a bottleneck
+    if (@block != 'COAL_BLOCK') {
         return();
     }
 
@@ -566,10 +569,10 @@ proc _MS_colourClay(@info, @minesList, @x, @y, @z) {
     @zpos = @pos[1];
 
     @tntcount = @minesList[@xpos * @cfg['z'] + @zpos];
-    ### Randomise the mine numbering a little. Still cheatable without it.
+    ## Randomise the mine numbering a little. Still cheatable without it.
     if (_MS_isMine(@info, @xpos, @zpos)) {
-        if (rand() < 0.5) {
-            if (rand() < 0.8) {
+        if (rand() < 0.6) {
+            if (rand() < 0.6) {
                 @tntcount -= 1;
             } else {
                 @tntcount += 1;
@@ -588,7 +591,6 @@ proc _MS_shuffleField(@info, @xpos, @zpos) {
     @gridx = @cfg['x'];
     @gridz = @cfg['z'];
 
-    #console(@minesList)
     @clicked = @xpos * @gridz + @zpos;
     if (@minesList[@clicked] != 0) {
 
@@ -601,7 +603,6 @@ proc _MS_shuffleField(@info, @xpos, @zpos) {
                     continue();
                 }
 
-                #console("Shuffle with @i, @j")
                 @s = array_size(@field);
 
                 @adjust = @found-@clicked;
