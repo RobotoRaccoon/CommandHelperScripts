@@ -10,11 +10,12 @@ include('includes.library/includes.ms');
 include('includes.library/commands.ms');
 
 bind('player_interact', null, null, @event) {
-    if (pworld() != 'Event' || !array_contains_ic(sk_regions_at(ploc()), 'mine-whole')) {
+    @player = @event['player'];
+    _MS_assertWorld(@player);
+    if (!array_contains_ic(sk_regions_at(ploc()), 'mine-whole')) {
         die();
     }
 
-    @player = @event['player'];
     if (!_MS_isPlaying(@player)) {
         die();
     }
@@ -46,20 +47,16 @@ bind('player_interact', null, null, @event) {
 }
 
 bind('block_break', null, null, @event) {
-    if (pworld() != 'Event') {
-        die()
-    }
-
+    @player = @event['player'];
+    _MS_assertWorld(@player);
     @loc = @event['location']
     if (!array_contains_ic(sk_regions_at(@loc), 'mine-snow')) {
         die();
     }
 
-    @player = @event['player'];
     if (!_MS_isPlaying(@player)) {
-        cancel()
-        _error('You are not currently playing.')
-
+        cancel();
+        _error('You are not currently playing.');
     }
 
     @block = @event['block'];
@@ -105,16 +102,13 @@ bind('block_break', null, null, @event) {
 }
 
 bind('block_place', null, null, @event) {
-    if (pworld() != 'Event') {
-        die();
-    }
-
+    @player = @event['player'];
+    _MS_assertWorld(@player);
     @loc = @event['location'];
     if (!array_contains_ic(sk_regions_at(@loc), 'mine-snow')) {
         die();
     }
 
-    @player = @event['player'];
     if (!_MS_isPlaying(@player)) {
         cancel();
         _error('You are not currently playing.');
@@ -134,22 +128,24 @@ bind('block_place', null, null, @event) {
 ###                         ###
 
 bind('inventory_click', null, null, @event) {
-    if (pworld() != 'Event' || !array_contains_ic(sk_regions_at(ploc()), 'mine-whole')) {
+    @player = @event['player'];
+    _MS_assertWorld(@player);
+    if (!array_contains_ic(sk_regions_at(ploc()), 'mine-whole')) {
         die();
     }
 
-    @player = @event['player'];
     if (_MS_isPlaying(@player)) {
         cancel();
     }
 }
 
 bind('item_held', null, null, @event) {
-    if (pworld() != 'Event' || !array_contains_ic(sk_regions_at(ploc()), 'mine-whole')) {
+    @player = @event['player'];
+    _MS_assertWorld(@player);
+    if (!array_contains_ic(sk_regions_at(ploc()), 'mine-whole')) {
         die();
     }
 
-    @player = @event['player'];
     ## Only allow first two slots to be selected
     if (_MS_isPlaying(@player) && @event['to'] > 1) {
         @from = @event['from'];
@@ -162,11 +158,11 @@ bind('item_held', null, null, @event) {
 
 bind('player_teleport', null, null, @event) {
     @player = @event['player'];
-    if (@player == null || pworld(@player) != 'Event' || !array_contains_ic(sk_regions_at(ploc(@player)), 'mine-whole')) {
+    _MS_assertWorld(@player);
+    if (@player == null || !array_contains_ic(sk_regions_at(ploc(@player)), 'mine-whole')) {
         die();
     }
 
-    @player = @event['player'];
     if (_MS_isPlaying(@player)) {
         cancel();
         _error('You cannot teleport out of minesweeper. Blow yourself up or /mines quit');
@@ -179,4 +175,3 @@ bind('player_quit', null, null, @event) {
         _MS_clear_values(@arena);
     }
 }
-

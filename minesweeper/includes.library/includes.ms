@@ -58,6 +58,10 @@ proc _MS_assertConfig(@cfg) {
     if (@cfg['mines'] > @size) { _error('Mines count must fit in grid'); }
 }
 
+proc _MS_assertWorld(@player=player()) {
+    if (@player == null || pworld(@player) != 'Event') { die(); }
+}
+
 ## Get the smallest valued corner for the specified config.
 proc _MS_gridCorner(@info) {
     @cfg = @info['config'];
