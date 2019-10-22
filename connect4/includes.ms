@@ -105,7 +105,7 @@ proc _C4_getPlayer(@user=player()) {
 
 proc _C4_reset() {
 
-    ### DO: Teleport players out
+    ## DO: Teleport players out
     _C4_clearvalues();
 
     _C4_podiumLight(1, false);
@@ -150,12 +150,12 @@ proc _C4_enable() {
 
 proc _C4_podium(@pl) {
     switch(@pl) {
-        case 1:
-            return(array(-1236.5, 9, 1464.5));
-        case 2:
-            return(array(-1268.5, 9, 1464.5));
-        default:
-            _error('Specificed player number is not 1 or 2.');
+    case 1:
+        return(array(-1236.5, 9, 1464.5));
+    case 2:
+        return(array(-1268.5, 9, 1464.5));
+    default:
+        _error('Specificed player number is not 1 or 2.');
     }
 }
 
@@ -170,7 +170,8 @@ proc _C4_podiumLight(@pl, @on) {
     } else {
         @block = 'AIR';
     }
-    _C4_setBlock(_C4_podium(@pl)[0], _C4_podium(@pl)[1] - 2, _C4_podium(@pl)[2], @block);
+    @pod = _C4_podium(@pl);
+    _C4_setBlock(@pod[0], @pod[1] - 2, @pod[2], @block);
 }
 
 ###           ###
@@ -253,9 +254,9 @@ proc _C4_play(@column) {
     }
 
     if (@pl == 1) {
-        @block = '159:10';
+        @block = 'PURPLE_TERRACOTTA';
     } else {
-        @block = '159:4';
+        @block = 'YELLOW_TERRACOTTA';
     }
 
     switch(@column) {
@@ -283,8 +284,8 @@ proc _C4_play(@column) {
 
     ## Place piece in topmost, or error if column is full.
     for (@y = 0, @y <= 5, @y++) {
-        @block = get_block(array('x':@cornerx, 'y':@cornery + @y, 'z':@cornerz + @column, 'world':'Event'));
-        if (@block == 'AIR') {
+        @curblock = _C4_getBlock(@cornerx, @cornery + @y, @cornerz + @column);
+        if (@curblock == 'AIR') {
 
             _C4_setBlock(@cornerx, @cornery + @y, @cornerz + @column, @block);
             _export_store('cnct4.lastPlayer', @pl);
@@ -357,27 +358,27 @@ proc _C4_draw() {
 }
 
 proc _C4_isStalemate() {
-    @cornerx = _C4_corner('x');
-    @cornery = _C4_corner('y');
-    @cornerz = _C4_corner('z');
+    @cx = _C4_corner('x');
+    @y = _C4_corner('y') + 5;
+    @cz = _C4_corner('z');
     if (_C4_getAxis() == 'x') {
         return(
-            get_block(array('x':@cornerx + 0, 'y':@cornery + 5, 'z':@cornerz, 'world':'Event')) != 'AIR' &&
-            get_block(array('x':@cornerx + 1, 'y':@cornery + 5, 'z':@cornerz, 'world':'Event')) != 'AIR' &&
-            get_block(array('x':@cornerx + 2, 'y':@cornery + 5, 'z':@cornerz, 'world':'Event')) != 'AIR' &&
-            get_block(array('x':@cornerx + 3, 'y':@cornery + 5, 'z':@cornerz, 'world':'Event')) != 'AIR' &&
-            get_block(array('x':@cornerx + 4, 'y':@cornery + 5, 'z':@cornerz, 'world':'Event')) != 'AIR' &&
-            get_block(array('x':@cornerx + 5, 'y':@cornery + 5, 'z':@cornerz, 'world':'Event')) != 'AIR' &&
-            get_block(array('x':@cornerx + 6, 'y':@cornery + 5, 'z':@cornerz, 'world':'Event')) != 'AIR');
+            _C4_getBlock(@cx + 0, @y, @cz) != 'AIR' &&
+            _C4_getBlock(@cx + 1, @y, @cz) != 'AIR' &&
+            _C4_getBlock(@cx + 2, @y, @cz) != 'AIR' &&
+            _C4_getBlock(@cx + 3, @y, @cz) != 'AIR' &&
+            _C4_getBlock(@cx + 4, @y, @cz) != 'AIR' &&
+            _C4_getBlock(@cx + 5, @y, @cz) != 'AIR' &&
+            _C4_getBlock(@cx + 6, @y, @cz) != 'AIR');
     } else {
         return(
-            get_block(array('x':@cornerx, 'y':@cornery + 5, 'z':@cornerz + 0, 'world':'Event')) != 'AIR' &&
-            get_block(array('x':@cornerx, 'y':@cornery + 5, 'z':@cornerz + 1, 'world':'Event')) != 'AIR' &&
-            get_block(array('x':@cornerx, 'y':@cornery + 5, 'z':@cornerz + 2, 'world':'Event')) != 'AIR' &&
-            get_block(array('x':@cornerx, 'y':@cornery + 5, 'z':@cornerz + 3, 'world':'Event')) != 'AIR' &&
-            get_block(array('x':@cornerx, 'y':@cornery + 5, 'z':@cornerz + 4, 'world':'Event')) != 'AIR' &&
-            get_block(array('x':@cornerx, 'y':@cornery + 5, 'z':@cornerz + 5, 'world':'Event')) != 'AIR' &&
-            get_block(array('x':@cornerx, 'y':@cornery + 5, 'z':@cornerz + 6, 'world':'Event')) != 'AIR');
+            _C4_getBlock(@cx, @y, @cz + 0) != 'AIR' &&
+            _C4_getBlock(@cx, @y, @cz + 1) != 'AIR' &&
+            _C4_getBlock(@cx, @y, @cz + 2) != 'AIR' &&
+            _C4_getBlock(@cx, @y, @cz + 3) != 'AIR' &&
+            _C4_getBlock(@cx, @y, @cz + 4) != 'AIR' &&
+            _C4_getBlock(@cx, @y, @cz + 5) != 'AIR' &&
+            _C4_getBlock(@cx, @y, @cz + 6) != 'AIR');
     }
 }
 
@@ -385,10 +386,10 @@ proc _C4_isStalemate() {
 ### Statistics ###
 ###            ###
 
-## Increments a stat type for a player.
+## Increments a stat type for a player
 proc _C4_stat(@player, @type) {
 
-    ### Get the stats, turns into UUID if not already. ###
+    ## Get the stats, turns into UUID if not already
     @UUID = _UUID_altered( _UUID_player_get(@player) );
     @stats = get_value("cnct4.stats.@UUID");
     if (@stats == null) {
@@ -400,7 +401,7 @@ proc _C4_stat(@player, @type) {
     }
 
     try( @stats[@type]++,
-        console(colorize('&4Error: &cAnd error occurred when trying to increment a stat.'));
+        console(colorize('&4Error: &cAn error occurred when trying to increment a stat.'));
         console(colorize("&5Player: &f@{player}&5, Type: &f@type"));
     );
 
@@ -411,7 +412,7 @@ proc _C4_stat(@player, @type) {
 ## Print the user stats to the screen.
 proc _C4_printStats(@user) {
 
-    ## Get the stats, turns into UUID if not already. ###
+    ## Get the stats, turns into UUID if not already
     @UUID = _UUID_altered( _UUID_player_get(@user, true) );
     @stats = get_value("cnct4.stats.@UUID");
     if (@stats == null) {
@@ -446,7 +447,7 @@ proc _check4row(@cornerx, @cornery, @cornerz, @block) {
         for (@z = 0, @z < 7, @z++) {
 
             ## Defaults to z-axis, swaps to x-axis if needed inside the method.
-            @curblock = get_block(array('x':@cornerx, 'y':@cornery + @y, 'z':@cornerz + @z, 'world':'Event'));
+            @curblock = _C4_getBlock(@cornerx, @cornery + @y, @cornerz + @z);
             if (@block == @curblock) {
                 if (_C4_checkline(@cornerx, @cornery + @y, @cornerz + @z, 'N', @block)) {
                     return(true);
@@ -466,6 +467,7 @@ proc _check4row(@cornerx, @cornery, @cornerz, @block) {
     return(false);
 }
 
+## TODO have an internally stored list, don't need to query the world for the block
 proc _C4_checkline(@x, @y, @z, @dir, @block) {
     @count = 0;
 
@@ -493,7 +495,7 @@ proc _C4_checkline(@x, @y, @z, @dir, @block) {
             @newz = @z;
         }
 
-        @curblock = get_block(array('x':@newx, 'y':@newy, 'z':@newz, 'world':'Event'));
+        @curblock = _C4_getBlock(@newx, @newy, @newz);
         if (@block != @curblock) {
             break();
         }
@@ -505,6 +507,12 @@ proc _C4_checkline(@x, @y, @z, @dir, @block) {
 ###         ###
 ### Helpers ###
 ###         ###
+proc _C4_getBlock(@x, @y, @z) {
+    @world = 'Event';
+    @block = get_block(array('x':@x, 'y':@y, 'z':@z, 'world':@world));
+    return(@block);
+}
+
 proc _C4_setBlock(@x, @y, @z, @block) {
     @world = 'Event';
     @loc = array('x':@x, 'y':@y, 'z':@z, 'world':@world);

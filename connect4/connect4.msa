@@ -15,7 +15,7 @@
 ## @RobotoRaccoon
 
 *:/connect4 [$p1] [$p2] = >>>
-_error('broken');
+_verify_op('broken');
     include('includes.ms');
 
     @p1 = to_lower($p1);
