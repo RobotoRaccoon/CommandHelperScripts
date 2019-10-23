@@ -8,36 +8,19 @@
 ## @RobotoRaccoon
 
 ## The help command
-proc _C4_help(@page=1, @player=player()) {
-
-    ### All commands go here if they are to show up in the help command.
+proc _C4_help(@page=1) {
     @commands = array(
-            '&5Help &f> &dShows all available commands.',
-            '&5Join &f> &dJoin a match.',
-            '&5Quit &f> &dForfeit the match.',
-            '&5Stats &f> &dView a player\'s stats.'
-        );
-    if (has_permission(@player, 'ch_staff')) {
-        @commands = array_merge(@commands, array(;
-                '&5Reset &f> &dForcefully end the arena.';
-            ));
+        '&5Help &f> &dShows all available commands',
+        '&5Join &f> &dJoin a match',
+        '&5Quit &f> &dForfeit the match',
+        '&5Stats &f> &dView a player\'s stats'
+    );
+    if (has_permission('ch_staff')) {
+        @commands = array_merge(@commands, array(
+            '&5Reset &f> &dForcefully end the arena'
+        ));
     }
-
-    ### Find the maximum amount of pages and ensure that the page selected is within the bounds, else set it to 1.
-    @perpage = 5;
-    @maxpage = ceil(array_size(@commands) / @perpage);
-    if (!is_numeric(@page) || @page < 1 || @page > @maxpage) {
-        @page = 1;
-    }
-
-    ### Prints all the @commands from the selected page. The try() is in case there are not 5 on that page.
-    tmsg(@player, colorize(' &7===== &5Options &7====='));
-    for (@i = 0, @i < @perpage, @i++) {
-        try(
-            tmsg(@player, colorize(@commands[@i + @perpage * (@page - 1)]) );
-           );
-    }
-    #tmsg(@player, colorize("&6Page &e@{page}/@{maxpage}&6. View more with &e/connect4 help <page>"))
+    _page_vertical('Options', 'connect4 help', @commands, @page);
 }
 
 ###          ###
@@ -115,7 +98,7 @@ proc _C4_reset() {
     @cornery = _C4_corner('y');
     @cornerz = _C4_corner('z');
 
-    ### Clear the board.
+    ## Clear the board
     if (_C4_getAxis() == 'x') {
         for (@x = 0, @x < 7, @x++) {
             for (@y = 0, @y < 6, @y++) {
@@ -161,7 +144,7 @@ proc _C4_podium(@pl) {
 
 proc _C4_podiumTeleport(@pl, @user=player()) {
     set_ploc(@user, _C4_podium(@pl));
-    pfacing(@user, @pl*2 - 1); ## 1->1, 2->3. Would have to modify depending on where your podiums face.;
+    pfacing(@user, @pl*2 - 1); ## 1->1, 2->3. Would have to modify depending on where your podiums face
 }
 
 proc _C4_podiumLight(@pl, @on) {
@@ -242,7 +225,7 @@ proc _C4_play(@column) {
     _no_console();
     _C4_isEnabled();
 
-    ## Only allow the two people who have joined to play.
+    ## Only allow the two people who have joined to play
     if (!_C4_isPlaying()) {
         _error('You are not currently playing!');
     }
@@ -250,7 +233,7 @@ proc _C4_play(@column) {
     @pl = _C4_getPlayer();
     @lastPlayer = _import_get('cnct4.lastPlayer');
     if (@lastPlayer == @pl || (@lastPlayer == null && @pl != 1)) {
-        _error('Please wait for your turn.');
+        _error('Please wait for your turn');
     }
 
     if (@pl == 1) {

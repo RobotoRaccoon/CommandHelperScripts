@@ -15,7 +15,6 @@
 ## @RobotoRaccoon
 
 *:/connect4 [$p1] [$p2] = >>>
-_verify_op('broken');
     include('includes.ms');
 
     @p1 = to_lower($p1);
@@ -51,7 +50,7 @@ _verify_op('broken');
         case 'reset':
             _verify_staff();
             _C4_reset();
-            msg(colorize('&cYou have forcefully ended the current round of &4Connect 4&c.'));
+            msg(colorize('&cYou have forcefully ended the current round of &4Connect 4'));
 
         default:
             _error('/connect4 help');
