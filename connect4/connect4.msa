@@ -15,6 +15,7 @@
 ## @RobotoRaccoon
 
 *:/connect4 [$p1] [$p2] = >>>
+    include('commands.ms');
     include('includes.ms');
 
     @p1 = to_lower($p1);
@@ -23,34 +24,25 @@
     switch(@p1) {
         case '':
         case 'help':
-            _C4_help(@p2);
+            _C4_cmd_help(@p2);
 
         case 'join':
         case 'enter':
-            _C4_join();
+            _C4_cmd_join();
 
         case 'quit':
         case 'leave':
-            _C4_quit();
+            _C4_cmd_quit();
 
         case 'play':
-            _C4_play(@p2);
+            _C4_cmd_play(@p2);
 
         case 'stats':
         case 'statistics':
-            if (@p2 == '') {
-                _no_console('/connect4 stats <player>');
-                @user = player();
-            } else {
-                @user = _autocomplete_player(@p2);
-            }
-
-            _C4_printStats(@user);
+            _C4_cmd_stats(@p2);
 
         case 'reset':
-            _verify_staff();
-            _C4_reset();
-            msg(colorize('&cYou have forcefully ended the current round of &4Connect 4'));
+            _C4_cmd_reset();
 
         default:
             _error('/connect4 help');
