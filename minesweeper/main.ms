@@ -12,9 +12,7 @@ include('includes.library/commands.ms');
 bind('player_interact', null, null, @event) {
     @player = @event['player'];
     _MS_assertWorld(@player);
-    if (!array_contains_ic(sk_regions_at(ploc()), 'mine-whole')) {
-        die();
-    }
+    _MS_assertRegion(ploc(@player), 'mine-whole');
 
     if (!_MS_isPlaying(@player)) {
         die();
@@ -48,11 +46,9 @@ bind('player_interact', null, null, @event) {
 
 bind('block_break', null, null, @event) {
     @player = @event['player'];
-    _MS_assertWorld(@player);
     @loc = @event['location']
-    if (!array_contains_ic(sk_regions_at(@loc), 'mine-snow')) {
-        die();
-    }
+    _MS_assertWorld(@player);
+    _MS_assertRegion(@loc, 'mine-snow');
 
     if (!_MS_isPlaying(@player)) {
         cancel();
@@ -103,11 +99,9 @@ bind('block_break', null, null, @event) {
 
 bind('block_place', null, null, @event) {
     @player = @event['player'];
-    _MS_assertWorld(@player);
     @loc = @event['location'];
-    if (!array_contains_ic(sk_regions_at(@loc), 'mine-snow')) {
-        die();
-    }
+    _MS_assertWorld(@player);
+    _MS_assertRegion(@loc, 'mine-snow');
 
     if (!_MS_isPlaying(@player)) {
         cancel();
@@ -130,9 +124,7 @@ bind('block_place', null, null, @event) {
 bind('inventory_click', null, null, @event) {
     @player = @event['player'];
     _MS_assertWorld(@player);
-    if (!array_contains_ic(sk_regions_at(ploc()), 'mine-whole')) {
-        die();
-    }
+    _MS_assertRegion(ploc(@player), 'mine-whole');
 
     if (_MS_isPlaying(@player)) {
         cancel();
@@ -142,9 +134,7 @@ bind('inventory_click', null, null, @event) {
 bind('item_held', null, null, @event) {
     @player = @event['player'];
     _MS_assertWorld(@player);
-    if (!array_contains_ic(sk_regions_at(ploc()), 'mine-whole')) {
-        die();
-    }
+    _MS_assertRegion(ploc(@player), 'mine-whole');
 
     ## Only allow first two slots to be selected
     if (_MS_isPlaying(@player) && @event['to'] > 1) {
@@ -159,9 +149,7 @@ bind('item_held', null, null, @event) {
 bind('player_teleport', null, null, @event) {
     @player = @event['player'];
     _MS_assertWorld(@player);
-    if (@player == null || !array_contains_ic(sk_regions_at(ploc(@player)), 'mine-whole')) {
-        die();
-    }
+    _MS_assertRegion(ploc(@player), 'mine-whole');
 
     if (_MS_isPlaying(@player)) {
         cancel();

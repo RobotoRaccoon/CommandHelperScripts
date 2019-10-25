@@ -62,6 +62,10 @@ proc _MS_assertWorld(@player=player()) {
     if (@player == null || pworld(@player) != 'Event') { die(); }
 }
 
+proc _MS_assertRegion(@loc, @region) {
+    if (!is_array(@loc) || !array_contains_ic(sk_regions_at(@loc), @region)) { die(); }
+}
+
 ## Get the smallest valued corner for the specified config.
 proc _MS_gridCorner(@info) {
     @cfg = @info['config'];
