@@ -133,8 +133,8 @@ proc _RAP_info_generate_timed(@reason, @timestamp, @staff, @length) {
     if (@length == null || @length == '') {
         _error('A length must be supplied');
     }
-    else if (!reg_match('^[1-9][0-9]*[mdwy]$', @length)) {
-        _error("Length must be a number follow by either m,d,w,y (e.g. 10m for 10 minutes)\nYou gave: @length");
+    else if (!reg_match('^[1-9][0-9]*[mhdwy]$', @length)) {
+        _error("Length must be a number follow by either m,h,d,w,y (e.g. 10m for 10 minutes)\nYou gave: @length");
     }
     else if (is_numeric(@reason[0])) {
         _error('The reason cannot start with a number, due to an Essentials bug');
