@@ -136,16 +136,17 @@ proc _C4_cmd_play(@column) {
         _error('Invalid column.');
     }
 
-    @cornerx = _C4_corner('x');
-    @cornery = _C4_corner('y');
-    @cornerz = _C4_corner('z');
+    @corner = _C4_corner();
+    @cx = @corner['x'];
+    @cy = @corner['y'];
+    @cz = @corner['z'];
 
     ## Place piece in topmost, or error if column is full.
     for (@y = 0, @y <= 5, @y++) {
-        @curblock = _C4_getBlock(@cornerx, @cornery + @y, @cornerz + @column);
+        @curblock = _C4_getBlock(@cx, @cy + @y, @cz + @column);
         if (@curblock == 'AIR') {
 
-            _C4_setBlock(@cornerx, @cornery + @y, @cornerz + @column, @block);
+            _C4_setBlock(@cx, @cy + @y, @cz + @column, @block);
             _export_store('cnct4.lastPlayer', @pl);
 
             if (@pl == 1) {
@@ -163,7 +164,7 @@ proc _C4_cmd_play(@column) {
     }
 
     ## If four in a row for @block.
-    if (_check4row(@cornerx, @cornery, @cornerz, @block)) {
+    if (_check4row(@cx, @cy, @cz, @block)) {
         _C4_win(player());
     }
     else if (_C4_isStalemate()) {

@@ -17,21 +17,8 @@ proc _C4_getAxis() {
 }
 
 ## The least-most corner of the board. Lowest possible x, y, and z coords where more negative is lower.
-proc _C4_corner(@axis=false) {
-    @result = array(-1253, 9, 1461);
-    if (@axis) {
-        switch(@axis) {
-        case 'x':
-            @result = @result[0];
-        case 'y':
-            @result = @result[1];
-        case 'z':
-            @result = @result[2];
-        default:
-            _error("Invalid argument for C4_corner; @axis");
-        }
-    }
-    return(@result);
+proc _C4_corner() {
+    return(array('x':-1253, 'y':9, 'z':1461));
 }
 
 ###
@@ -78,21 +65,22 @@ proc _C4_reset() {
     _C4_podiumLight(1, false);
     _C4_podiumLight(2, false);
 
-    @cornerx = _C4_corner('x');
-    @cornery = _C4_corner('y');
-    @cornerz = _C4_corner('z');
+    @corner = _C4_corner();
+    @cx = @corner['x'];
+    @cy = @corner['y'];
+    @cz = @corner['z'];
 
     ## Clear the board
     if (_C4_getAxis() == 'x') {
         for (@x = 0, @x < 7, @x++) {
             for (@y = 0, @y < 6, @y++) {
-                _C4_setBlock(@cornerx + @x, @cornery + @y, @cornerz, 'AIR');
+                _C4_setBlock(@cx + @x, @cy + @y, @cz, 'AIR');
             }
         }
     } else {
         for (@z = 0, @z < 7, @z++) {
             for (@y = 0, @y < 6, @y++) {
-                _C4_setBlock(@cornerx, @cornery + @y, @cornerz + @z, 'AIR');
+                _C4_setBlock(@cx, @cy + @y, @cz + @z, 'AIR');
             }
         }
     }
@@ -185,9 +173,10 @@ proc _C4_draw() {
 }
 
 proc _C4_isStalemate() {
-    @cx = _C4_corner('x');
-    @y = _C4_corner('y') + 5;
-    @cz = _C4_corner('z');
+    @corner = _C4_corner();
+    @cx = @corner['x'];
+    @y = @corner['y'] + 5;
+    @cz = @corner['z'];
     if (_C4_getAxis() == 'x') {
         return(
             _C4_getBlock(@cx + 0, @y, @cz) != 'AIR' &&
@@ -269,23 +258,23 @@ proc _C4_printStats(@user) {
 ###                            ###
 ### Checking for four in a row ###
 ###                            ###
-proc _check4row(@cornerx, @cornery, @cornerz, @block) {
+proc _check4row(@cx, @cy, @cz, @block) {
     for (@y = 0, @y < 6, @y++) {
         for (@z = 0, @z < 7, @z++) {
 
             ## Defaults to z-axis, swaps to x-axis if needed inside the method.
-            @curblock = _C4_getBlock(@cornerx, @cornery + @y, @cornerz + @z);
+            @curblock = _C4_getBlock(@cx, @cy + @y, @cz + @z);
             if (@block == @curblock) {
-                if (_C4_checkline(@cornerx, @cornery + @y, @cornerz + @z, 'N', @block)) {
+                if (_C4_checkline(@cx, @cy + @y, @cz + @z, 'N', @block)) {
                     return(true);
                 }
-                if (_C4_checkline(@cornerx, @cornery + @y, @cornerz + @z, 'E', @block)) {
+                if (_C4_checkline(@cx, @cy + @y, @cz + @z, 'E', @block)) {
                     return(true);
                 }
-                if (_C4_checkline(@cornerx, @cornery + @y, @cornerz + @z, 'NW', @block)) {
+                if (_C4_checkline(@cx, @cy + @y, @cz + @z, 'NW', @block)) {
                     return(true);
                 }
-                if (_C4_checkline(@cornerx, @cornery + @y, @cornerz + @z, 'NE', @block)) {
+                if (_C4_checkline(@cx, @cy + @y, @cz + @z, 'NE', @block)) {
                     return(true);
                 }
             }
