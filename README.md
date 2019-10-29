@@ -27,8 +27,11 @@ Creates a system for purchasing shop teleports, not actual shops. To be used in 
 Quick and easy script to save and load complete loadouts, including the armor slots.
 
 #### Tab Complete
-Register commands with the Minecraft auto-completer, and allow for generic argument completions. Completions can be supllied as a string array via a closure. If no closure is supplied the list of online players is used by default.
+Register commands with the Minecraft auto-completer, and allow for generic argument completions. Completions can be supplied as a string array via a closure. If no closure is supplied the list of online players is used by default.
 Currently there is no way to specify different completions given the argument number or arguments that come before it.
+
+#### Watchdog
+Monitor that a database connection exists and is not returning garbage data. (Used on a Redis instance where a slave can be in READ-ONLY mode and break everything)
 
 ## Misc. Functions
 These may come one day, but for now they're just stubbed
