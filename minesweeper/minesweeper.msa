@@ -5,8 +5,9 @@
 #                       #
 #########################
 
-### CodebotoCodecoon ###
+## @RobotoRaccoon
 
+*:/minesweeper [$] = _error('Use /mines');
 *:/mines [$] = >>>
     include('includes.library/includes.ms');
     include('includes.library/commands.ms');
