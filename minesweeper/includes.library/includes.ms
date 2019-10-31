@@ -95,7 +95,7 @@ proc _MS_clear_values(@arena) {
     export("minesweeper.player.@player", null);
 
     ## Temp saved data
-    export("minesweeper.cheatclicks.@player", null);
+    export("minesweeper.antibreak.@player", null);
     export("minesweeper.snow.@arena", null);
 
     if (ponline(@player)) {
@@ -360,6 +360,24 @@ proc _MS_clayColours() {
         'LIGHT_GRAY_TERRACOTTA',
         'LIGHT_GRAY_TERRACOTTA',
         'LIGHT_GRAY_TERRACOTTA'));
+}
+
+proc _MS_antiBreak(@player) {
+    @clicks = import("minesweeper.antibreak.@player");
+    if (is_null(@clicks)) {
+        @clicks = 0;
+    }
+    @clicks++;
+    @max = 4;
+
+    if (@clicks > @max) {
+        @arena = _MS_getArena(@player);
+        _MS_reset(@arena);
+        msg(colorize('&4BZZT. &cYou have been kicked for attempted cheating\nDo not attempt to break the floor'));
+    } else {
+        msg(colorize('&4Do not break anything but snow and flowerpots\n&cContinued attempts will result in your match being cancelled'));
+        export("minesweeper.antibreak.@player", @clicks);
+    }
 }
 
 proc _MS_firstArena(@cfg) {

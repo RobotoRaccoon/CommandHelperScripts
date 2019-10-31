@@ -5,7 +5,8 @@
 #                       #
 #########################
 
-### CodebotoCodecoon ###
+## @RobotoRaccoon
+
 include('includes.library/includes.ms');
 include('includes.library/commands.ms');
 
@@ -21,22 +22,7 @@ bind('player_interact', null, null, @event) {
     @validBlock = array_contains(array('SNOW_BLOCK', 'FLOWER_POT'), @event['block']);
     if (@event['action'] == 'left_click_block' && !@validBlock) {
         cancel();
-
-        @clicks = import("minesweeper.cheatclicks.@player");
-        if (is_null(@clicks)) {
-            @clicks = 0;
-        }
-        @clicks++;
-        @max = 3;
-
-        if (@clicks > @max) {
-            @arena = _MS_getArena(@player);
-            _MS_reset(@arena);
-            msg(colorize('&4BZZT. &cYou have been kicked for attempted cheating\nDo not attempt to break the floor'));
-        } else {
-            msg(colorize('&4Do not break anything but snow and flowerpots\n&cContinued attempts will result in your match being cancelled'));
-            export("minesweeper.cheatclicks.@player", @clicks);
-        }
+        _MS_antiBreak(@player);
     }
     else if (@event['action'] == 'right_click_block') {
         cancel();
