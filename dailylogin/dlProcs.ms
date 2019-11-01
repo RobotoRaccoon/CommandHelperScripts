@@ -5,13 +5,13 @@
 #                       #
 #########################
 
-### Main proc to test if it's a new day
+## Main proc to test if it's a new day
 proc _dl_add(@player) {
     @UUID = _UUID_player_altered(@player);
 
     @update = _dl_checkUpdate(@UUID);
     if (!@update) {
-        ### Don't need to update, return no change
+        ## Don't need to update, return no change
         return(false);
     }
 
@@ -61,7 +61,7 @@ proc _dl_checkUpdate(@UUID) {
     }
 
     if (@diff > 1) {
-        ### Didn't log in for a whole day, reset
+        ## Didn't log in for a whole day, reset
         _dl_resetConsecutive(@UUID);
     }
 
@@ -140,29 +140,33 @@ proc _dl_topList(@best) {
     @saved = "dailylogin.top.@best";
     @top = import(@saved);
 
-    ### Reset every 6 minutes
+    ## Reset every 10 minutes
     if (is_array(@top)) {
-        if (time() - 360000 < @top['time']) {
+        if (time() - 600000 < @top['time']) {
             return(@top['list']);
-        }
-    }
-
-    @list = array();
-    @values = get_values('dailylogin.best'); ### Everyone who has a streak
-    foreach (@key : @value in @values) {
-        @UUID = split('.', @key)[2];
-        @count = _dl_getBest(@UUID);
-        @streak = _dl_checkConsecutive(@UUID);
-        if (@count > 1) {
-            @list[] = array(uuid: @UUID, count: @count, streak: @streak);
         }
     }
 
     if (@best) {
         @key = 'count';
+        @conditional = closure(@count, @streak) { return(@count > 1); }
     } else {
         @key = 'streak';
+        @conditional = closure(@count, @streak) { return(@streak > 0); }
     }
+
+    @list = array();
+    @values = get_values('dailylogin.best'); ## Everyone who has a streak
+    foreach (@path : @value in @values) {
+        @UUID = split('.', @path)[2];
+        @count = _dl_getBest(@UUID);
+        @streak = _dl_checkConsecutive(@UUID);
+
+        if (execute(@count, @streak, @conditional)) {
+            @list[] = array(uuid: @UUID, count: @count, streak: @streak);
+        }
+    }
+
     array_sort(@list, closure(@left, @right) {
         return(@left[@key] < @right[@key]);
     });
@@ -178,8 +182,8 @@ proc _dl_topList(@best) {
 ###           ###
 
 proc _dl_getToday() {
-    @hours = floor(time()/3600000) + 10; ### Milliseconds to hours since 1970-01-01 00:00:00 (UTC+10)
-    @today = floor(@hours/24); ### Convert to days
+    @hours = floor(time()/3600000) + 10; ## Milliseconds to hours since 1970-01-01 00:00:00 (UTC+10)
+    @today = floor(@hours/24); ## Convert to days
     return(@today);
 }
 
@@ -232,4 +236,3 @@ proc _dl_updateBest(@UUID, @count) {
         _export_store("dailylogin.best.@UUID", @count);
     }
 }
-
