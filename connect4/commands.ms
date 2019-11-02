@@ -106,8 +106,8 @@ proc _C4_cmd_play(@column) {
     }
 
     @pl = _C4_getPlayer();
-    @lastPlayer = _import_get('cnct4.lastPlayer');
-    if (@lastPlayer == @pl || (@lastPlayer == null && @pl != 1)) {
+    @lastPlayer = _C4_getLastPlayer();
+    if (@lastPlayer == @pl) {
         _error('Please wait for your turn');
     }
 
@@ -147,15 +147,7 @@ proc _C4_cmd_play(@column) {
         if (@curblock == 'AIR') {
 
             _C4_setBlock(@cx, @cy + @y, @cz + @column, @block);
-            _export_store('cnct4.lastPlayer', @pl);
-
-            if (@pl == 1) {
-                _C4_podiumLight(1, false);
-                _C4_podiumLight(2, true);
-            } else {
-                _C4_podiumLight(1, true);
-                _C4_podiumLight(2, false);
-            }
+            _C4_setLastPlayer(@pl);
             break();
         }
         else if (@y == 5) {

@@ -88,15 +88,29 @@ proc _C4_reset() {
 
 proc _C4_clearvalues() {
     _export_store('cnct4.enabled', false);
-    _export_store('cnct4.lastPlayer', null);
+    _C4_setLastPlayer(null);
     _export_store('cnct4.player1', null);
     _export_store('cnct4.player2', null);
 }
 
 proc _C4_enable() {
-    ### Turn on player 1's podium light and allow pieces to be played.
-    _C4_podiumLight(1, true);
+    ## Turn on player 1's podium light and allow pieces to be played
+    _C4_setLastPlayer(2);
     _export_store('cnct4.enabled', true);
+}
+
+proc _C4_getlastPlayer() {
+    @pl = _import_get('cnct.lastPlayer');
+    ## If null, 0, 2, etc... set to 2
+    if (@pl != 1) { @pl = 2; }
+    return(@pl);
+}
+
+proc _C4_setLastPlayer(@pl) {
+    _export_store('cnct4.lastPlayer', @pl);
+    ## Opposite player's move. Show neither if null
+    _C4_podiumLight(1, @pl == 2);
+    _C4_podiumLight(2, @pl == 1);
 }
 
 ###        ###
@@ -133,32 +147,29 @@ proc _C4_podiumLight(@pl, @on) {
 ### Win/Lose/Draw ###
 ###               ###
 
-proc _C4_win(@player) {
-    @pl1 = _import_get('cnct4.player1');
-    @pl2 = _import_get('cnct4.player2');
+proc _C4_win(@winner) {
+    @p1 = _import_get('cnct4.player1');
+    @p2 = _import_get('cnct4.player2');
 
-    if (@player == @pl1) {
+    if (@winner == @p1) {
         @color = '&5';
-
-        _C4_stat(@pl1, 'win');
-        _C4_stat(@pl2, 'loss');
-        try( pkill(@pl2) );
+        @loser = @p2;
     } else {
         @color = '&e';
-
-        _C4_stat(@pl1, 'loss');
-        _C4_stat(@pl2, 'win');
-        try( pkill(@pl1) );
+        @loser = @p1;
     }
 
+    _C4_stat(@winner, 'win');
+    _C4_stat(@loser, 'loss');
+
     _C4_clearvalues();
-    runas('~console', "/warp connect4 @player");
+    runas(@winner, '/warp connect4');
+    runas(@loser, '/warp connect4');
 
-    broadcast(colorize("@{color}@{player} &fhas won &cFour in a row!"));
+    broadcast(colorize("@{color}@{winner} &fhas won &cFour in a row!"));
     ## Disabled due to potential cheating for money by constantly quitting, making other person get money.
-    #acc_add(@player, 10)
-    #tmsg(@player, colorize('&a$10 has been added to your account!'))
-
+    #acc_add(@winner, 10)
+    #tmsg(@winner, colorize('&a$10 has been added to your account!'))
 }
 
 proc _C4_draw() {
