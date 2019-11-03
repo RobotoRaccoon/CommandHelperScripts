@@ -76,11 +76,11 @@ proc _MS_gridCorner(@info) {
     return(@c);
 }
 
-proc _MS_reset(@arena=0) {
+proc _MS_reset(@arena) {
     _MS_clear_values(@arena)
 
     ## Clear clay, snow, markers
-    _MS_setFloor(@arena, 'AIR');
+    _MS_setFloor(@arena, 'COAL_BLOCK');
     _MS_setFloor(@arena, 'AIR', 2);
     _MS_setFloor(@arena, 'AIR', 1);
 }
@@ -325,8 +325,11 @@ proc _MS_getSnow(@arena) {
 proc _MS_decreaseSnow(@arena) {
     export("minesweeper.snow.@arena", _MS_getSnow(@arena) - 1);
 }
-proc _MS_resetSnow(@arena) {
-    export("minesweeper.snow.@arena", _MS_calculateSnow(@arena));
+proc _MS_resetSnow(@arena, @snow=null) {
+    if (@snow == null) {
+        @snow =  _MS_calculateSnow(@arena);
+    }
+    export("minesweeper.snow.@arena", @snow);
 }
 
 proc _MS_calculateSnow(@arena) {
@@ -411,6 +414,18 @@ proc _MS_explode(@arena, @info, @x, @y, @z) {
     msg(colorize("&cUh-oh, boom time! &fTime elapsed: &c@elapse"));
     _MS_setBlock(@x, @y, @z, 'TNT');
     _MS_setBlock(@x, @y-1, @z, 'TNT');
+}
+
+proc _MS_warpIn(@player, @corner, @cfg) {
+    @loc = array(
+        'x': @corner[0] - 1,
+        'y': @corner[1] + 1,
+        'z': @corner[2] + @cfg['z']/2,
+        'world': 'Event');
+    @success = set_ploc(@player, @loc);
+    if (!@success) {
+        _error('Unable to join Minesweeper - Are you in a minigame?');
+    }
 }
 
 ###                   ###

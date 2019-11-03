@@ -35,43 +35,41 @@ proc _MS_start(@args) {
         @cfg['mines'] = integer(@args[2]);
     }
 
-    @arena = _MS_firstArena(@cfg);
-    ## Setup arena
-    _MS_reset(@arena);
-    ## Set floor to Coal Block
-    _MS_setFloor(@arena, 'COAL_BLOCK');
-
-    ## Get the config for the specified size
-    _MS_assertConfig(@cfg);
-    @gridx = @cfg['x'];
-    @gridz = @cfg['z'];
-    @mines = @cfg['mines'];
-
     if (array_size(@args) > 3) {
         @seed = @args[3];
     } else {
         @seed = _MS_genSeed();
     }
 
-    @field = _MS_generate_field(@gridx, @gridz, @mines, @seed);
-    @info = array('player': player(), 'arena': @arena, 'config': @cfg, 'field': @field, 'seed': @seed, 'time': null);
+    ## Validate configuration (really just used for custom sizes)
+    _MS_assertConfig(@cfg);
+    ## First available arena - errors if none available
+    @arena = _MS_firstArena(@cfg);
+    _MS_reset(@arena);
 
+    @field = _MS_generate_field(@cfg['x'], @cfg['z'], @cfg['mines'], @seed);
+    @info = array('player': player(), 'arena': @arena, 'config': @cfg, 'field': @field, 'seed': @seed, 'time': null);
     @c = _MS_gridCorner(@info);
+
+    ## Validate player is able to be teleported into the arena and start setup
+    _MS_warpIn(player(), @c, @cfg);
+
+    @gridx = @cfg['x'];
+    @gridz = @cfg['z'];
     ## Set clay and snow
     for (@x = 0, @x < @gridx, @x++) {
         for (@z = 0, @z < @gridz, @z++) {
             _MS_setBlock(@c[0] + @x, @c[1] + 1, @c[2] + @z, 'SNOW_BLOCK')
-            _MS_setBlock(@c[0] + @x, @c[1], @c[2] + @z, 'COAL_BLOCK')
+            #_MS_setBlock(@c[0] + @x, @c[1], @c[2] + @z, 'COAL_BLOCK')
         }
     }
 
-    _MS_resetSnow(@arena);
+    _MS_resetSnow(@arena, @gridx * @gridz);
 
     ## Setup player
     set_pheld_slot(player(), 0);
     _MS_setInv(@info);
     ptake_item(array(name:'WOODEN_HOE'));
-    set_ploc(player(), array(@c[0] - 2, @c[1] + 1, @c[2] + @gridz/2, 'Event'));
     set_pmode(player(), 'CREATIVE');
 
     _MS_storeInfo(@info);
