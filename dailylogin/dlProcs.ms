@@ -149,9 +149,11 @@ proc _dl_topList(@best) {
 
     if (@best) {
         @key = 'count';
+        @key2 = 'streak';
         @conditional = closure(@count, @streak) { return(@count > 1); }
     } else {
         @key = 'streak';
+        @key2 = 'count';
         @conditional = closure(@count, @streak) { return(@streak > 0); }
     }
 
@@ -167,8 +169,10 @@ proc _dl_topList(@best) {
         }
     }
 
+    ## Sort on primary, or secondary if equal
     array_sort(@list, closure(@left, @right) {
-        return(@left[@key] < @right[@key]);
+        if (@left[@key] < @right[@key]) { return(true); }
+        return(@left[@key] == @right[@key] && @left[@key2] < @right[@key2])
     });
 
     @top = array(time: time(), list: @list);
