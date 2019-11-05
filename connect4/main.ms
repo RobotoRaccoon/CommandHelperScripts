@@ -8,12 +8,6 @@
 ## @RobotoRaccoon
 
 bind('player_teleport', null, null, @event) {
-
-    @enabled = _import_get('cnct4.enabled');
-    if (@enabled != true) {
-        die();
-    }
-
     @player1 = _import_get('cnct4.player1');
     @player2 = _import_get('cnct4.player2');
 
@@ -24,17 +18,10 @@ bind('player_teleport', null, null, @event) {
 }
 
 bind('player_quit', null, null, @event) {
-
-    @enabled = _import_get('cnct4.enabled');
-    if (@enabled != true) {
-        die();
-    }
-
     @player1 = _import_get('cnct4.player1');
     @player2 = _import_get('cnct4.player2');
 
     if (player() == @player1 || player() == @player2) {
-
         try( if( @player1 == player() ) {
             tmsg(@player2, colorize("&5@player1 &fhas quit &cFour in a Row."));
             _C4_win(@player2);
@@ -42,7 +29,6 @@ bind('player_quit', null, null, @event) {
             tmsg(@player1, colorize("&e@player2 &fhas quit &cFour in a Row."));
             _C4_win(@player1);
         } )
-
         _C4_reset();
     }
 }
