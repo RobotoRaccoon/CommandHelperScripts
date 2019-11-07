@@ -13,7 +13,7 @@ bind('player_teleport', null, null, @event) {
 
     if (player() == @player1 || player() == @player2) {
         cancel();
-        _error('You must quit Connect Four before being able to leave.');
+        _error('You must quit Connect 4 before being able to leave.');
     }
 }
 
@@ -23,10 +23,10 @@ bind('player_quit', null, null, @event) {
 
     if (player() == @player1 || player() == @player2) {
         try( if( @player1 == player() ) {
-            tmsg(@player2, colorize("&5@player1 &fhas quit &cFour in a Row."));
+            tmsg(@player2, colorize("&5@player1 &fhas quit &cConnect 4."));
             _C4_win(@player2);
         } else {
-            tmsg(@player1, colorize("&e@player2 &fhas quit &cFour in a Row."));
+            tmsg(@player1, colorize("&e@player2 &fhas quit &cConnect 4."));
             _C4_win(@player1);
         } )
         _C4_reset();

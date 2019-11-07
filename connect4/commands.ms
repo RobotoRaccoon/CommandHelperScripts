@@ -66,7 +66,7 @@ proc _C4_cmd_join(@user=player()) {
 
     _C4_podiumTeleport(@pl);
     set_pmode(@user, 'SURVIVAL');
-    tmsg(@user, colorize("&fYou have joined &cFour in a row &fas &5Player @pl"));
+    tmsg(@user, colorize("&fYou have joined &cConnect 4 &fas &5Player @pl"));
     tmsg(@user, colorize('&4Right click &con the slabs to place a piece.'));
 
     ## Needs to run after teleport
@@ -83,15 +83,15 @@ proc _C4_cmd_quit() {
         @pl2 = _import_get('cnct4.player2');
 
         try( if (@pl1 == player()) {
-            tmsg(@pl2, colorize("&5@pl1 &fhas quit &cFour in a Row."));
+            tmsg(@pl2, colorize("&5@pl1 &fhas quit &cConnect 4."));
             _C4_win(@pl2);
         } else {
-            tmsg(@pl1, colorize("&e@pl2 &fhas quit &cFour in a Row."));
+            tmsg(@pl1, colorize("&e@pl2 &fhas quit &cConnect 4."));
             _C4_win(@pl1);
         } );
 
         _C4_reset();
-        die(colorize('&cYou have quit &4Four in a Row'));
+        die(colorize('&cYou have quit &4Connect 4'));
     }
     _error('You are not playing!');
 }

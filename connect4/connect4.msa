@@ -22,29 +22,29 @@
     @p2 = to_lower($p2);
 
     switch(@p1) {
-        case '':
-        case 'help':
-            _C4_cmd_help(@p2);
+    case '':
+    case 'help':
+        _C4_cmd_help(@p2);
 
-        case 'join':
-        case 'enter':
-            _C4_cmd_join();
+    case 'join':
+    case 'enter':
+        _C4_cmd_join();
 
-        case 'quit':
-        case 'leave':
-            _C4_cmd_quit();
+    case 'quit':
+    case 'leave':
+        _C4_cmd_quit();
 
-        case 'play':
-            _C4_cmd_play(@p2);
+    case 'play':
+        _C4_cmd_play(@p2);
 
-        case 'stats':
-        case 'statistics':
-            _C4_cmd_stats(@p2);
+    case 'stats':
+    case 'statistics':
+        _C4_cmd_stats(@p2);
 
-        case 'reset':
-            _C4_cmd_reset();
+    case 'reset':
+        _C4_cmd_reset();
 
-        default:
-            _error('/connect4 help');
+    default:
+        _error('/connect4 help');
     }
 <<<

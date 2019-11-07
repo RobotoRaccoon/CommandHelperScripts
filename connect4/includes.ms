@@ -166,7 +166,7 @@ proc _C4_win(@winner) {
     runas(@winner, '/warp connect4');
     runas(@loser, '/warp connect4');
 
-    broadcast(colorize("@{color}@{winner} &fhas won &cFour in a row!"));
+    broadcast(colorize("@{color}@{winner} &fhas won &cConnect 4!"));
     ## Disabled due to potential cheating for money by constantly quitting, making other person get money.
     #acc_add(@winner, 10)
     #tmsg(@winner, colorize('&a$10 has been added to your account!'))
@@ -180,7 +180,7 @@ proc _C4_draw() {
     _C4_stat(@pl2, 'draw');
 
     _C4_clearvalues();
-    broadcast(colorize('&cStalemate! &fNo one won &cFour in a row!'));
+    broadcast(colorize('&cStalemate! &fNo one won &cConnect 4!'));
 }
 
 proc _C4_isStalemate() {
@@ -259,7 +259,7 @@ proc _C4_printStats(@user) {
     @ratio = round(@stats['win'] / (@stats['win'] + @stats['loss']) * 100, 0);
 
     ## Print the stats
-    msg(colorize("&e-- &cFour in a Row &fstats: &5@name &e--"));
+    msg(colorize("&e-- &cConnect 4 &fstats: &5@name &e--"));
     msg(colorize('&5Wins&f: '. @stats['win']. " &6(@{ratio}%)"));
     msg(colorize('&5Losses&f: '. @stats['loss']));
     msg(colorize('&5Draws&f: '. @stats['draw']));
@@ -304,16 +304,16 @@ proc _C4_checkline(@x, @y, @z, @dir, @block) {
 
     while (true) {
         switch(@dir) {
-            case 'N':
-                @newy = @y + @count;
-            case 'E':
-                @newz = @z + @count;
-            case 'NW':
-                @newy = @y + @count;
-                @newz = @z - @count;
-            case 'NE':
-                @newy = @y + @count;
-                @newz = @z + @count;
+        case 'N':
+            @newy = @y + @count;
+        case 'E':
+            @newz = @z + @count;
+        case 'NW':
+            @newy = @y + @count;
+            @newz = @z - @count;
+        case 'NE':
+            @newy = @y + @count;
+            @newz = @z + @count;
         }
 
         ## Direction correction
