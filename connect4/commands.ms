@@ -56,15 +56,16 @@ proc _C4_cmd_join(@user=player()) {
     @pl2 = _import_get('cnct4.player2');
     if (@pl1 == null) {
         @pl = 1;
-        _C4_reset();
+        _C4_podiumTeleport(@pl);
         _export_store("cnct4.player1", @user);
+        _C4_clearBoard();
     } else {
         @pl = 2;
+        _C4_podiumTeleport(@pl);
         _export_store("cnct4.player2", @user);
         tmsg(@pl1, colorize("&f@user has joined &cConnect 4 &fas &ePlayer 2"));
     }
 
-    _C4_podiumTeleport(@pl);
     set_pmode(@user, 'SURVIVAL');
     tmsg(@user, colorize("&fYou have joined &cConnect 4 &fas &5Player @pl"));
     tmsg(@user, colorize('&4Right click &con the slabs to place a piece.'));

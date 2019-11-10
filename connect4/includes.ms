@@ -64,7 +64,10 @@ proc _C4_reset() {
 
     _C4_podiumLight(1, false);
     _C4_podiumLight(2, false);
+    _C4_clearBoard();
+}
 
+proc _C4_clearBoard() {
     @corner = _C4_corner();
     @cx = @corner['x'];
     @cy = @corner['y'];
@@ -129,7 +132,10 @@ proc _C4_podium(@pl) {
 }
 
 proc _C4_podiumTeleport(@pl, @user=player()) {
-    set_ploc(@user, _C4_podium(@pl));
+    @success = set_ploc(@user, _C4_podium(@pl));
+    if (!@success) {
+        _error('Unable to join Connect 4 - Are you in a minigame?');
+    }
     pfacing(@user, @pl*2 - 1); ## 1->1, 2->3. Would have to modify depending on where your podiums face
 }
 
