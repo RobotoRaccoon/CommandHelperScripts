@@ -12,74 +12,74 @@
     @p2 = to_lower($p2);
 
     switch(@p1) {
-        case '':
-        case 'help':
-            _book_help(@p2);
+    case '':
+    case 'help':
+        _book_help(@p2);
 
-        case 'list':
-            _paginate('book IDs', _book_getList(), @p2);
+    case 'list':
+        _paginate('book IDs', _book_getList(), @p2);
 
-        case 'get':
-            if (@p2 == '') {
-                _error("/book @p1 <id>");
+    case 'get':
+        if (@p2 == '') {
+            _error("/book @p1 <id>");
+        }
+        _book_get(@p2);
+
+    case 'save':
+        if (@p2 == '') {
+            _error("/book @p1 <id>");
+        }
+        _book_save(@p2);
+
+    case 'delete':
+        if (@p2 == '') {
+            _error("/book @p1 <id>");
+        }
+        _book_delete(@p2);
+
+    case 'title':
+        if (@p2 == '') {
+            _error("/book @p1 <newTitle>");
+        }
+
+        @newTitle = $p2;
+        if ($ != '') {
+            @newTitle .= ' '.$;
+        }
+        _book_setTitle(@newTitle);
+
+    case 'author':
+        if (@p2 == '') {
+            _error("/book @p1 <newAuthor>");
+        }
+
+        @newAuthor = $p2;
+        if ($ != '') {
+            @newAuthor .= ' '.$;
+        }
+        _book_setAuthor(@newAuthor);
+
+    case 'unwrite':
+        _book_unwrite();
+
+    case 'firstjoin':
+    case 'fj':
+        if (@p2 == '') {
+            @list = get_value("CHBook.firstjoin");
+            if (!is_array(@list)) {
+                @list = array('None');
             }
-            _book_get(@p2);
+            msg(colorize("&6Books given on first join: &e". array_implode(@list,', ')));
+            die(colorize("&cTo add a new book, /book @p1 <id>"));
+        }
+        _book_firstJoin(@p2);
 
-        case 'save':
-            if (@p2 == '') {
-                _error("/book @p1 <id>");
-            }
-            _book_save(@p2);
-
-        case 'delete':
-            if (@p2 == '') {
-                _error("/book @p1 <id>");
-            }
-            _book_delete(@p2);
-
-        case 'title':
-            if (@p2 == '') {
-                _error("/book @p1 <newTitle>");
-            }
-
-            @newTitle = $p2;
-            if ($ != '') {
-                @newTitle .= ' '.$;
-            }
-            _book_setTitle(@newTitle);
-
-        case 'author':
-            if (@p2 == '') {
-                _error("/book @p1 <newAuthor>");
-            }
-
-            @newAuthor = $p2;
-            if ($ != '') {
-                @newAuthor .= ' '.$;
-            }
-            _book_setAuthor(@newAuthor);
-
-        case 'unwrite':
-            _book_unwrite();
-
-        case 'firstjoin':
-        case 'fj':
-            if (@p2 == '') {
-                @list = get_value("CHBook.firstjoin");
-                if (!is_array(@list)) {
-                    @list = array('None');
-                }
-                msg(colorize("&6Books given on first join: &e". array_implode(@list,', ')));
-                die(colorize("&cTo add a new book, /book @p1 <id>"));
-            }
-            _book_firstJoin(@p2);
-
-        default:
-            if (@p1 != '' && _book_exists(@p1)) {
-                _book_get(@p1);
-            } else {
-                _error('/book help');
-            }
+    default:
+        if (@p1 != '' && _book_exists(@p1)) {
+            _book_get(@p1);
+        } else {
+            _error('/book help');
+        }
     }
 <<<
 

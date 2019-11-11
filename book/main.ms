@@ -16,7 +16,7 @@ bind('player_join', null, null, @e) {
         die();
     }
 
-    @list = get_value("CHBook.firstjoin")
+    @list = get_value("CHBook.firstjoin");
     if (!is_array(@list)) {
         die();
     }
