@@ -1,0 +1,37 @@
+#########################
+#                       #
+# THIS IS A MASTER FILE #
+#  ~/minecraft/master   #
+#                       #
+#########################
+
+## @RobotoRaccoon
+
+*:/silentjoin [$p1] [$] = >>>
+    _no_console()
+    _verify_staff();
+
+    clear_value('silentjoin.players');
+
+    if($p1 == '') {
+        @player = player();
+    } else {
+        _verify_op();
+        @player = _autocomplete_player($p1);
+    }
+
+    #@UUID = _UUID_player_altered(@player);
+    @permission = 'mcau.silentjoin';
+
+    if (has_permission(@player, @permission)) {
+        @cmd = "/perms player @player unset @permission";
+        @msg = "&eSilent join for &6@player &ehas been &cdisabled";
+    } else {
+        @cmd = "/perms player @player set @permission";
+        @msg = "&eSilent join for &6@player &ehas been &aenabled";
+    }
+
+    _bc_staff(colorize(@msg));
+    runas('~console', @cmd);
+<<<
+

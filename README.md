@@ -14,6 +14,10 @@ A recreation of four-in-a-row inside Minecraft. Configuration for this is not th
 #### Daily Login
 Track consecutive daily logins and give monetary rewards for logging in
 
+#### Join/Quit
+Alter join and quit messages for players to pick a random message each time.
+Includes commands to disable messages for players with a given silentjoin permission, and announce fake join/quit messages.
+
 #### Minesweeper
 Minesweeper in Minecraft! I really shouldn't have done this using CommandHelper, but here we are. It supports multi-sized arenas, multiple arenas, monetary payouts, leaderboards, and configurable preset modes.
 

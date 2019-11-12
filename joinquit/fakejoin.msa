@@ -1,0 +1,19 @@
+﻿#########################
+#                       #
+# THIS IS A MASTER FILE #
+#  ~/minecraft/master   #
+#                       #
+#########################
+
+## @RobotoRaccoon
+
+*:/fakejoin $p = >>>
+    _verify_staff();
+    broadcast(_join_message($p));
+<<<
+
+*:/fakequit $p = >>>
+    _verify_staff();
+    broadcast(_quit_message($p));
+<<<
+
