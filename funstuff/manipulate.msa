@@ -1,0 +1,85 @@
+#########################
+#                       #
+# THIS IS A MASTER FILE #
+#  ~/minecraft/master   #
+#                       #
+#########################
+
+## @RobotoRaccoon
+
+*:/splode [$p] = >>>
+    _verify_staff()
+
+    @p = _autocomplete_player($p, true)
+
+    @flyingalready = phas_flight(@p);
+    set_pflight(@p,true);
+    @x = (rand(10) - 5);
+    @z = (rand(10) - 5);
+    set_pvelocity(@p,@x,2,@z);
+    set_peffect(@p,11,50,15,true,false);
+
+    @effect = 'EXPLOSION_HUGE'
+    @sound = 'ENTITY_GENERIC_EXPLODE'
+    for (@a = 0, @a < 20, @a++) {
+        @delay = (@a * 200) + 500;
+        set_timeout(@delay,closure() {
+            spawn_particle(ploc(@p), @effect);
+            play_sound(ploc(@p), array(sound:@sound, volume:10, pitch:0.4));
+            set_pvelocity(@p,0,2,0);
+        });
+    }
+    set_timeout(4000, closure(set_pflight(@p,@flyingalready)));
+<<<
+
+*:/hoppy [$p] = >>>
+    _verify_staff()
+    @p = _autocomplete_player($p, true)
+
+    ## Resistance (?)
+    set_peffect(@p,11,50,5,true,false);
+    set_pvelocity(@p,0,3,0);
+<<<
+
+*:/punt [$p] [$pow] [$] = >>>
+    _verify_staff()
+    @p = _autocomplete_player($p, true)
+
+    @x = (rand(10) - 5)
+    @y = rand(3)
+    @z = (rand(10) - 5)
+
+    ## Resistance (?)
+    set_peffect(@p,11,50,5,true,false);
+    set_pvelocity(@p,@x,@y,@z)
+<<<
+
+*:/dpunt [$p] [$pow] [$] = >>>
+    _verify_staff();
+    if ($p == '') {
+        _no_console();
+        @p = player();
+    } else {
+        @p = _autocomplete_player($p, true);
+    }
+
+    if (player() == '~console') {
+        @end = pcursor(@p);
+    } else {
+        @end = pcursor();
+    }
+
+    @start = ploc(@p);
+    @x = @end['x'] - @start['x'];
+    @y = @end['y'] - @start['y'];
+    @z = @end['z'] - @start['z'];
+
+    @denom = (@x**2 + @y**2 + @z**2)**0.5 / 5
+    @x /= @denom;
+    @y /= @denom;
+    @z /= @denom;
+
+    ## Resistance (?)
+    set_peffect(@p,11,50,5,true,false);
+    set_pvelocity(@p,array('x':@x,'y':@y,'z':@z));
+<<<
