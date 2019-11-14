@@ -1,0 +1,117 @@
+#########################
+#                       #
+# THIS IS A MASTER FILE #
+#  ~/minecraft/master   #
+#                       #
+#########################
+
+## @RobotoRaccoon
+
+*:/ride [$horse] = >>>
+    _verify_janitor()
+    _no_console()
+    if($horse == '')
+        { _error('/ride <player>') }
+
+    @horse = _autocomplete_player($horse, true)
+
+    if(player() == @horse) {
+        _error('You cannot ride yourself!')
+    }
+
+    @horseID = pinfo(@horse, 13)
+    @riderID = pinfo(player(), 13)
+
+    ## Makes the new horse dismount whatever it is riding
+    set_entity_rider(null, @horseID)
+    ## Put you on the new horse. /tpo to stop visual glitching
+    sudo('/tpo '. player(@horse))
+    set_entity_rider(@horseID, @riderID)
+<<<
+
+*:/carry [$rider] [$player] [$]= >>>
+    _verify_janitor()
+    _no_console()
+    if ($rider == '') {
+        _error('/carry <eject|player> [target-player]')
+    }
+
+    @player = player();
+    if ($player != '') {
+        @player = _autocomplete_player($player, true);
+    }
+
+    @horseID = pinfo(@player, 13)
+    if ($rider == 'eject') {
+        set_entity_rider(@horseID, null)
+        die(colorize("&eEjected some jerk off of your head..."))
+    }
+
+    _verify_staff()
+    @rider = _autocomplete_player($rider, true)
+    @riderID = pinfo(@rider, 13)
+
+    if (@player == @rider) {
+        if (@player == player()) {
+            _error('You cannot ride yourself!');
+        } else {
+            _error('You cannot make someone ride themself!')
+        }
+    }
+
+    ## Makes the new rider eject all its riders. Towers work using this method, not /ride
+    set_entity_rider(@riderID, null)
+    ## Put the new rider on your head! /tpohere to stop visual glitching
+    sudo("/tpohere @rider")
+    set_entity_rider(@horseID, @riderID)
+<<<
+
+*:/carryit [$player] [$] = >>>
+    _no_console();
+    _verify_janitor();
+    include('riding.ms');
+
+    @entID = _ride_getMobID();
+
+    @player = player();
+    if ($player != '') {
+        @player = _autocomplete_player($player, true);
+    }
+
+    _ride_carryID(@player, @entID);
+<<<
+
+*:/rideit [$player] [$] = >>>
+    _no_console();
+    _verify_janitor();
+    include('riding.ms');
+
+    @entID = _ride_getMobID();
+
+    @player = player();
+    if ($player != '') {
+        @player = _autocomplete_player($player, true);
+    }
+
+    _ride_rideID(@player, @entID);
+<<<
+
+*:/rideitspawn [$mob] = >>>
+    _no_console();
+    _verify_staff();
+    include('riding.ms');
+
+    @riderID = pinfo(player(),13);
+    @MobID = _ride_spawnMobID($mob);
+    set_entity_rider(@MobID, @riderID);
+<<<
+
+*:/carryitspawn [$mob] = >>>
+    _no_console();
+    _verify_staff();
+    include('riding.ms');
+
+    @riderID = pinfo(player(),13);
+    @MobID = _ride_spawnMobID($mob);
+    set_entity_rider(@riderID, @MobID);
+<<<

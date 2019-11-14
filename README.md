@@ -17,6 +17,7 @@ Track consecutive daily logins and give monetary rewards for logging in
 #### Fun Stuff
 Assorted collection of scripts that don't really serve a purpose:
 * Manipulation: Explode, punt, or make a player super-jump
+* Riding: Ride/sit on players, entities, or spawned entities
 
 #### Join/Quit
 Alter join and quit messages for players to pick a random message each time.
