@@ -16,6 +16,7 @@ Track consecutive daily logins and give monetary rewards for logging in
 
 #### Fun Stuff
 Assorted collection of scripts that don't really serve a purpose:
+* ArrowJourney: Ride arrows that you shoot from a custom bow
 * Manipulation: Explode, punt, or make a player super-jump
 * Riding: Ride/sit on players, entities, or spawned entities
 
