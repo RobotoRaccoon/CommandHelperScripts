@@ -24,6 +24,9 @@ Assorted collection of scripts that don't really serve a purpose:
 Alter join and quit messages for players to pick a random message each time.
 Includes commands to disable messages for players with a given silentjoin permission, and announce fake join/quit messages.
 
+#### Messages
+Personal messaging, with socialspy abilities.
+
 #### Minesweeper
 Minesweeper in Minecraft! I really shouldn't have done this using CommandHelper, but here we are. It supports multi-sized arenas, multiple arenas, monetary payouts, leaderboards, and configurable preset modes.
 

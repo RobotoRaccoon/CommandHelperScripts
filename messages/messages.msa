@@ -1,0 +1,157 @@
+#########################
+#                       #
+# THIS IS A MASTER FILE #
+#  ~/minecraft/master   #
+#                       #
+#########################
+
+## @RobotoRaccoon
+
+## Denied commands
+*:/pm [$] = _error('Sorry, we don\'t have private messages. Try /msg');
+*:/m [$] = _error('/msg <Player> <Message>');
+*:/tell [$] = _error('/msg <Player> <Message>');
+*:/t [$] = _error('/msg <Player> <Message>');
+*:/reply [$] = _error('/r <Message>');
+*:/whisper [$] = _error('/msg <player> <message>');
+*:/w [$] = _error('/msg <player> <message>');
+
+*:/msg [$player] [$] = >>>
+    if ($player == '' || $ == '') {
+        _error('/msg <player> <message>');
+    }
+
+    @receiver = _autocomplete_player($player, false, true);
+    if (!has_permission('herochat.pm')) {
+        _bc_staff(colorize('&cFailed message by &4'. player()."&c: &8@receiver ". $));
+        _error('You are not allowed to message.');
+    }
+
+    include('includes.ms');
+    _pmessage(@receiver, $, false);
+<<<
+
+*:/r [$] = >>>
+    if ($ == '') {
+        _error('/r <message>');
+    }
+
+    ## Get the last player who they messaged, or messaged them
+    @sender = player();
+    if (@sender == '~console') {
+        @sender = 'console';
+    }
+
+    @receiver = _import_get('pmessage.'. to_lower(@sender));
+    @receiver = _autocomplete_player(@receiver, false, true);
+
+    if (!has_permission('herochat.pm')) {
+        _bc_staff(colorize('&cFailed message by &4'. player()."&c: &8@receiver ". $));
+        _error('You are not allowed to message.');
+    }
+
+    include('includes.ms');
+    _pmessage(@receiver, $, true);
+<<<
+
+*:/socialspy [$player] [$] = >>>
+    _verify_staff();
+
+    if ($player == '') {
+        _no_console();
+        @player = player();
+    } else {
+        _verify_op('No arguments allowed, simply: /socialspy');
+        @player = _autocomplete_player($player);
+    }
+
+    @UUID = _UUID_player_altered(@player);
+    @status = get_value("socialspy.@UUID");
+
+    if (@status) {
+        @msg = colorize("&cSocialspy &ehas been &cdisabled &efor &c@player &eby &5". player());
+    } else {
+        @msg = colorize("&cSocialspy &ehas been &aenabled &efor &c@player &eby &5". player());
+    }
+
+    _bc_staff(@msg);
+    store_value("socialspy.@UUID", !@status);
+<<<
+
+*:/ssignore [$p1] [$p2] [$] = >>>
+    _verify_staff();
+    if ($p2 == '') {
+        _error('/ssignore <player1> <player2>');
+    }
+
+    @p1 = _autocomplete_player($p1, false, true);
+    @p2 = _autocomplete_player($p2, false, true);
+
+    include('includes.ms')
+    _ss_ignore(@p1, @p2);
+<<<
+
+*:/unignore [$] = >>>
+    _error('The `/ignore <player>` command is a toggle. Use that to unignore someone.')
+<<<
+
+*:/ignore [$p1] [$p2] [$p3] [$] = >>>
+    if($p1 == '') {
+        _error('/ignore <player|list>')
+    }
+
+    include('includes.ms')
+
+    if($p1 == 'list') {
+
+        if( !is_numeric($p3) && ( is_numeric($p2) || $p2 == '' ) ) {
+            @player = player()
+            @page = $p2
+        } else {
+            _verify_janitor('Only Staff can look at other peoples\' ignore lists.')
+            @player = $p2
+            @page = $p3
+        }
+
+        @lcplayer = to_lower(@player)
+        @ignores = _msg_getIgnoreList(@lcplayer);
+        array_sort(@ignores, 'STRING_IC')
+
+        _pagelist("people ignored by @player", @ignores, @page)
+        die()
+    }
+
+    if ($p2 == '') {
+        _no_console();
+        @player = player();
+        @offender = _autocomplete_player($p1);
+    } else {
+        _verify_staff()
+        @player = _autocomplete_player($p1);
+        @offender = _autocomplete_player($p2);
+        msg(colorize('&d&lThe messages will look odd as this is not meant for forcing other players to ignore.'));
+    }
+
+    @lcplayer = to_lower(@player);
+    @lcoffender = to_lower(@offender);
+
+    @ignores = _msg_getIgnoreList(@lcplayer);
+    array_sort(@ignores, 'STRING_IC');
+
+    ## Vault permission check for offline players, I think...
+    if (vault_has_permission(@offender, 'ch_janitor') && !has_permission(player(), 'ch_janitor')) {
+        _error('You cannot ignore a staff member.');
+    }
+
+    if (array_contains_ic(@ignores, @lcoffender)) {
+        array_remove_values(@ignores, @lcoffender);
+        msg(colorize("&6You have &cremoved &5@offender &6from your ignore list"));
+    } else {
+        @ignores[] = @lcoffender;
+        msg(colorize("&6You have &aadded &5@offender &6to your ignore list"));
+    }
+
+    _msg_setIgnoreList(@lcplayer, @ignores);
+    run('/ignore' @lcoffender);
+    die(colorize('&cIf these are out of sync, do /ch ignore <player>'));
+<<<
