@@ -5,20 +5,19 @@
 #                       #
 #########################
 
-### @RobotoRaccoon
+## @RobotoRaccoon
 
 ###          ###
 ### Commands ###
 ###          ###
 proc _staffkit_help(@args) {
-
-    if(array_size(@args) == 0) {
+    if (array_size(@args) == 0) {
         @page = 1;
     } else {
         @page = @args[0];
     }
 
-    ### All commands go here if they are to show up in the help command.
+    ## All commands go here if they are to show up in the help command.
     @commands = array(
             '&5List &f> &dDisplay all kits',
             '&5Save &f> &dSave your currently inventory',
@@ -33,7 +32,7 @@ proc _staffkit_help(@args) {
 proc _staffkit_list(@args) {
     @kits = _staffkit_getKitList();
     @page = 1;
-    if(array_size(@args) > 0) {
+    if (array_size(@args) > 0) {
         @page = @args[0];
     }
 
@@ -41,7 +40,7 @@ proc _staffkit_list(@args) {
 }
 
 proc _staffkit_save(@args) {
-    if(array_size(@args) < 1) {
+    if (array_size(@args) < 1) {
         _error('/staffkit save <name>');
     }
 
@@ -52,7 +51,7 @@ proc _staffkit_save(@args) {
 }
 
 proc _staffkit_delete(@args) {
-    if(array_size(@args) < 1) {
+    if (array_size(@args) < 1) {
         _error('/staffkit delete <name>');
     }
 
@@ -63,7 +62,7 @@ proc _staffkit_delete(@args) {
 }
 
 proc _staffkit_equip(@args) {
-    if(array_size(@args) < 1) {
+    if (array_size(@args) < 1) {
         @name = _staffkit_getDefaultKit();
     } else {
         @name = to_lower(@args[0]);
@@ -75,7 +74,7 @@ proc _staffkit_equip(@args) {
 }
 
 proc _staffkit_setDefault(@args) {
-    if(array_size(@args) < 1) {
+    if (array_size(@args) < 1) {
         _error('/staffkit setDefault <name>');
     }
 
@@ -109,7 +108,7 @@ proc _staffkit_getKit(@name) {
 proc _staffkit_saveKit(@name, @kit) {
     store_value("staffkit.kit.@name", @kit);
     @kits = _staffkit_getKitList();
-    if(!array_contains_ic(@kits, @name)) {
+    if (!array_contains_ic(@kits, @name)) {
         @kits[] = @name;
         _staffkit_saveKitList(@kits);
     }
@@ -123,20 +122,20 @@ proc _staffkit_deleteKit(@name) {
 }
 
 proc _staffkit_errorExists(@name) {
-    if( _staffkit_getKit(@name) != null) {
+    if (_staffkit_getKit(@name) != null) {
         _error('This Staff Kit already exists');
     }
 }
 
 proc _staffkit_errorNotExists(@name) {
-    if( _staffkit_getKit(@name) == null) {
+    if (_staffkit_getKit(@name) == null) {
         _error('A Staff Kit by this name does not exist, have a look in /staffkit list');
     }
 }
 
 proc _staffkit_getDefaultKit() {
     @default = get_value('staffkit.default');
-    if(@default == null) {
+    if (@default == null) {
         _error('No default kit has been defined');
     }
     return(@default);
@@ -145,4 +144,3 @@ proc _staffkit_getDefaultKit() {
 proc _staffkit_setDefaultKit(@name) {
     store_value('staffkit.default', @name);
 }
-

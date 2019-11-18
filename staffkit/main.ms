@@ -5,7 +5,7 @@
 #                       #
 #########################
 
-### @RobotoRaccoon
+## @RobotoRaccoon
 
 include('staffkitProcs.ms');
 
@@ -15,4 +15,3 @@ _register_tabcomp_cmd('staffkit', closure() {
 _register_tabcomp_cmd('sk', closure() {
     return(_staffkit_getKitList());
 });
-
