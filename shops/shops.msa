@@ -5,7 +5,7 @@
 #                       #
 #########################
 
-### @RobotoRaccoon
+## @RobotoRaccoon
 
 ## A system to allow the purchasing of shop teleports.
 ## These "shops" can be put into categories depending on what their owner deems they are selling.
@@ -19,104 +19,104 @@
 
     include('commandProcs.ms');
     switch (@p1) {
-        #case 'killshit':
-        #    _verify_op();
-        #    foreach( @shop in _shops_getShops() ) {
-        #        @info = _shops_get_info(@shop);
-        #        if(@info['time'] < 1484931600000) {
-        #            _shops_remove(@shop, true, true);
-        #            msg(colorize("&5Removed &7Shop @shop"));
-        #        }
-        #    }
+    #case 'killshit':
+    #    _verify_op();
+    #    foreach( @shop in _shops_getShops() ) {
+    #        @info = _shops_get_info(@shop);
+    #        if(@info['time'] < 1484931600000) {
+    #            _shops_remove(@shop, true, true);
+    #            msg(colorize("&5Removed &7Shop @shop"));
+    #        }
+    #    }
 
-        case '':
-        case 'help':
-            _shops_cmd_help(@p2);
+    case '':
+    case 'help':
+        _shops_cmd_help(@p2);
 
-        case 'about':
-            _shops_cmd_about();
+    case 'about':
+        _shops_cmd_about();
 
-        case 'tp':
-        case 'teleport':
-        case 'warp':
-            _no_console();
-            if (@p2 == '') {
-                _error("/shop @p1 <number | random>");
-            }
-            _shops_cmd_teleport(@p2);
+    case 'tp':
+    case 'teleport':
+    case 'warp':
+        _no_console();
+        if (@p2 == '') {
+            _error("/shop @p1 <number | random>");
+        }
+        _shops_cmd_teleport(@p2);
 
-        case 'info':
-            if (@p2 == '') {
-                _error("/shop @p1 <number>");
-            }
-            _shops_cmd_info(@p2);
+    case 'info':
+        if (@p2 == '') {
+            _error("/shop @p1 <number>");
+        }
+        _shops_cmd_info(@p2);
 
-        case 'like':
-            _no_console();
-            if (@p2 == '') {
-                _error("/shop @p1 <number>");
-            }
-            _shops_cmd_like(@p2);
+    case 'like':
+        _no_console();
+        if (@p2 == '') {
+            _error("/shop @p1 <number>");
+        }
+        _shops_cmd_like(@p2);
 
-        case 'buy':
-        case 'purchase':
-            _no_console();
-            _verify_user1('Sorry, you have to be a at least a [1] to buy a shop');
-            if (@p2 == '') {
-                msg(colorize("&6Purchase a shop: &e&l$". _shops_purchase()));
-                msg(colorize("&6Upkeep a shop: &e&l$". _shops_perday(). "/day"));
-                _error("/shop @p1 <number>");
-            }
-            _shops_cmd_buy(@p2);
+    case 'buy':
+    case 'purchase':
+        _no_console();
+        _verify_user1('Sorry, you have to be a at least a [1] to buy a shop');
+        if (@p2 == '') {
+            msg(colorize("&6Purchase a shop: &e&l$". _shops_purchase()));
+            msg(colorize("&6Upkeep a shop: &e&l$". _shops_perday(). "/day"));
+            _error("/shop @p1 <number>");
+        }
+        _shops_cmd_buy(@p2);
 
-        case 'remove':
-        case 'delete':
-        case 'del':
-            if (@p2 == '') {
-                _error("/shop @p1 <number>");
-            }
-            _shops_cmd_remove(@p2);
+    case 'remove':
+    case 'delete':
+    case 'del':
+        if (@p2 == '') {
+            _error("/shop @p1 <number>");
+        }
+        _shops_cmd_remove(@p2);
 
-        case 'all':
-            _shops_cmd_all(@p2);
+    case 'all':
+        _shops_cmd_all(@p2);
 
-        case 'list':
-        case 'ls':
-            if (@p2 == '') {
-                _error('/shop list <category | all>');
-            }
-            _shops_cmd_list(@p2);
+    case 'list':
+    case 'ls':
+        if (@p2 == '') {
+            _error('/shop list <category | all>');
+        }
+        _shops_cmd_list(@p2);
 
-        case 'edit':
-        case 'modify':
-            if (@p2 == '') {
-                _error("/shop @p1 <number>");
-            }
-            _shops_cmd_edit(@p2, @p3, @p4);
+    case 'edit':
+    case 'modify':
+        if (@p2 == '') {
+            _error("/shop @p1 <number>");
+        }
+        _shops_cmd_edit(@p2, @p3, @p4);
 
-#        case 'resetall':
-#            _shops_remove_all();
+#    case 'resetall':
+#        _shops_remove_all();
 
-#        case 'killnetherlocs':
-#            _verify_op();
-#            msg("Removing shop teleports in the Nether");
-#            foreach( @shop in _shops_getShops() ) {
-#                @info = _shops_get_info(@shop);
-#                @ploc = @info['ploc'];
-#                if( @ploc == null || @ploc['world'] == 'world_nether' ) {
-#                    @info['ploc'] = null;
-#                    _shops_store_info(@shop, @info);
-#                    msg("Going to remove teleport for shop @shop, as it's in the nether");
-#                }
+#    case 'killnetherlocs':
+#        _verify_op();
+#        msg("Removing shop teleports in the Nether");
+#        foreach( @shop in _shops_getShops() ) {
+#            @info = _shops_get_info(@shop);
+#            @ploc = @info['ploc'];
+#            if( @ploc == null || @ploc['world'] == 'world_nether' ) {
+#                @info['ploc'] = null;
+#                _shops_store_info(@shop, @info);
+#                msg("Going to remove teleport for shop @shop, as it's in the nether");
 #            }
+#        }
 
-        default:
-            if (is_integral(@p1)) {
-                _no_console('/shop help');
-                _shops_cmd_teleport(@p1);
-            } else {
-                _error('/shop help');
-            }
+    default:
+        if (is_integral(@p1)) {
+            _no_console('/shop help');
+            _shops_cmd_teleport(@p1);
+        } else {
+            _error('/shop help');
+        }
     }
 <<<
 

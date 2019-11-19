@@ -15,7 +15,7 @@ include('shopsProcs.ms');
 
 bind('player_join', null, null, @e) {
     @UUID = _UUID_player_altered(player());
-    @shop = get_value("shops.expirenotify.@UUID"); ### Ugly method but eh. Only an issue if they have more than one expired shop.
+    @shop = get_value("shops.expirenotify.@UUID"); ## Ugly method but eh. Only an issue if they have more than one expired shop.
 
     if (@shop && is_numeric(@shop) && !_shops_active(@shop)) {
         try(set_timeout(5000, closure() {
@@ -25,4 +25,3 @@ bind('player_join', null, null, @e) {
         }))
     }
 }
-

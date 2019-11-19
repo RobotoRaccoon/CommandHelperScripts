@@ -5,16 +5,16 @@
 #                       #
 #########################
 
-### @RobotoRaccoon
+## @RobotoRaccoon
 
 ###              ###
 ### Buy / Remove ###
 ###              ###
 
-proc _shops_perday() { return(25); } ### Upkeep
-proc _shops_purchase() { return(250); } ### Initial payment
+proc _shops_perday() { return(25); } ## Upkeep
+proc _shops_purchase() { return(250); } ## Initial payment
 
-### Add money to a shop's balance.
+## Add money to a shop's balance
 proc _shops_addbalance(@shop, @money) {
     @info = _shops_get_info(@shop);
     if (!is_integral(@money) || @money < 1) {
@@ -25,37 +25,37 @@ proc _shops_addbalance(@shop, @money) {
         _error('You do not have enough money in your account.');
     }
 
-    ### Means they ran out of rent.
+    ## Means they ran out of rent, reset old balance and silently re-buy
     if (!_shops_active(@shop)) {
         #_error("Sorry, but you have ran out of money in your account. You need to re-purchase a shop.")
         @info['balance'] = 0;
         @info['time'] = time();
     }
 
-    ### Adds money to the "balance"
+    ## Adds money to the "balance"
     @info['balance'] += @money;
     acc_subtract(player(), @money);
     _shops_store_info(@shop, @info);
     msg(colorize("&6You have added &e$@money &6to your shop's balance..."));
 }
 
-### Remove a shop
+## Remove a shop
 proc _shops_remove(@shop, @silent=false, @force=false) {
     @info = _shops_get_info(@shop);
 
-    ### Only allow the owner or staff to remove shops.
+    ## Only allow the owner or staff to remove shops
     if (_UUID_player_get(player()) != @info['owner'] && !@force) {
         _verify_staff('You do not own this shop.');
     }
 
-    ### Fail-safe
+    ## Fail-safe
     if (!import("shops.failsafe.@shop") && !@force) {
         msg(colorize("&4Warning: &cYou are about to remove &4shop @shop&c.\nTo remove the shop, run the same command again."));
         export("shops.failsafe.@shop", true);
         die();
     }
 
-    ### Clear from categories
+    ## Clear from categories
     foreach (_shops_cat_list(), @cat) {
         _shops_cat_off(@shop, @cat, true);
     }
@@ -83,13 +83,13 @@ proc _shops_remove_all() {
 ### Information ###
 ###             ###
 
-### @shop = integer > 0
-### @info = array(owner: UUID, ploc: ploc, balance: money, time: time(), likes: array(UUID))
+## @shop = integer > 0
+## @info = array(owner: UUID, ploc: ploc, balance: money, time: time(), likes: array(UUID))
 
-### Store the information for a shop.
+## Store the information for a shop
 proc _shops_store_info(@shop, @info) {
 
-    ### Simple error checking that should in theory never show up.
+    ## Simple error checking that should in theory never show up
     if (!is_integral(@shop) || @shop <= 0 || @shop[0] == 0) {
         _error("'@shop' is not an integer, or is less than 1.");
     }
@@ -100,13 +100,13 @@ proc _shops_store_info(@shop, @info) {
     _export_store("shops.info.@shop", @info);
 }
 
-### Generate the @info array.
+## Generate the @info array
 proc _shops_generate_info(@UUID, @ploc, @money, @time=time(), @likes=array()) {
-    _teleport_bannedblocks(@ploc); ### Testing if teleport location is legal.
+    _teleport_bannedblocks(@ploc); ## Testing if teleport location is legal.
     return (array(owner: @UUID, ploc: @ploc, balance: @money, time: @time, likes: @likes));
 }
 
-### Get the information for a shop.
+## Get the information for a shop
 proc _shops_get_info(@shop) {
     if (!_shops_has_info(@shop)) {
         _error("Shop '@shop' not found.");
@@ -114,7 +114,7 @@ proc _shops_get_info(@shop) {
     return(_import_get("shops.info.@shop"));
 }
 
-### Check if a shop has information (i.e, exists).
+## Check if a shop has information (i.e, exists)
 proc _shops_has_info(@shop) {
     if (!is_integral(@shop) || @shop <= 0 || @shop[0] == 0) {
         _error("'@shop' is not an integer, or is less than 1.");
@@ -122,7 +122,7 @@ proc _shops_has_info(@shop) {
     return(_import_get("shops.info.@shop") != null);
 }
 
-### Check if a person has enough money in their shop account.
+## Check if a person has enough money in their shop account
 proc _shops_active(@shop) {
     @daysleft = _shops_daysLeft(@shop);
 
@@ -136,32 +136,31 @@ proc _shops_active(@shop) {
 
 proc _shops_daysLeft(@shop) {
     @info = _shops_get_info(@shop);
-    @hourdiff = round((time() - @info['time'])/3600000) ### Hours since they purchased the shop, rounded.
+    @hourdiff = round((time() - @info['time'])/3600000) ## Hours since they purchased the shop, rounded
     @balance = @info['balance'];
 
     return(@balance/_shops_perday() - @hourdiff/24);
 }
 
-
 ###            ###
 ### Categories ###
 ###            ###
 
-### @categories = array('Animals', 'Building', 'Food', 'Mining', 'Potions', 'Redstone', 'Tools', 'Weapons', 'Other')
+## @categories = array('Animals', 'Building', 'Food', 'Mining', 'Potions', 'Redstone', 'Tools', 'Weapons', 'Other')
 
-### Get categories.
+## Get categories
 proc _shops_cat_list() {
     return(array('Animals', 'Building', 'Food', 'Mining', 'Potions', 'Redstone', 'Tools', 'Weapons', 'Other'));
 }
 
-### Check if supplied category is valid.
+## Check if supplied category is valid
 proc _shops_cat_check(@cat) {
     if (!array_contains_ic(_shops_cat_list(), @cat)) {
         _error("'@cat' is not a valid category in: ". _shops_cat_list());
     }
 }
 
-### Get list of shops in a category.
+## Get list of shops in a category
 proc _shops_cat_get(@category) {
     @category = to_lower(@category);
     _shops_cat_check(@category);
@@ -174,7 +173,7 @@ proc _shops_cat_get(@category) {
     return(@list);
 }
 
-### Toggle category on a shop.
+## Toggle category on a shop
 proc _shops_cat_toggle(@shop, @category) {
     if (!_shops_has_info(@shop)) {
         _error("Shop '@shop' not found.");
@@ -214,24 +213,22 @@ proc _shops_cat_on(@shop, @category, @silent=false) {
 ### Likes ###
 ###       ###
 
-### Re-evaluate the likes list for every player
-proc _shops_likes_refreshLists() {
-    @list = _shops_getSorted();
+## Re-evaluate the likes list for every player
+#proc _shops_likes_refreshLists() {
+#    @list = _shops_getSorted();
+#
+#    ## Clear all player lists
+#    @keys = array_keys(get_values("shops.likes."));
+#    foreach (@key in @keys) {
+#        clear_value(@key);
+#    }
+#}
 
-    ### Clear all player lists
-    @keys = array_keys(get_values("shops.likes."));
-    foreach (@key in @keys) {
-        clear_value(@key);
-    }
-
-    ### To be continued if I still feel like it. This shitty vim and syntax highlighter ruins everything
-}
-
-### Returns a sorted, by rating.
+## Returns a sorted, by rating
 proc _shops_getSorted() {
     @sorted = import("shops.sorted");
 
-    ### Update every 30 minutes
+    ## Update every 30 minutes
     if (!is_array(@sorted) || (time() - @sorted['time']) > 1800000) {
         @sorted = _shops_sortShops();
     }
@@ -239,12 +236,11 @@ proc _shops_getSorted() {
     return(@sorted['list']);
 }
 
-### Get all the shops, not sorted.
+## Get all the shops, not sorted
 proc _shops_getShops() {
     @list = array_keys(get_values('shops.info.'));
     @shoparray = array();
 
-    #Build array of shopnumbers.
     foreach (@shop in @list) {
         @shop = split('.',@shop)[2];
         @shoparray[] = @shop;
@@ -266,7 +262,7 @@ proc _shops_sortShops() {
 
     @list = array_sort(@shoparray,
         closure(@left,@right) {
-            return( _shops_rating(@left, _shops_get_info(@left)) < _shops_rating(@right, _shops_get_info(@right)));
+            return(_shops_rating(@left, _shops_get_info(@left)) < _shops_rating(@right, _shops_get_info(@right)));
         }
     );
 
@@ -290,7 +286,7 @@ proc _shops_allShops() {
     return(@list);
 }
 
-### Multi-line pagination
+## Multi-line pagination
 proc _shops_paginate(@title, @list) {
     ### Make the first letter a capital.
     @title = to_upper(substr(@title, 0, 1)). to_lower(substr(@title, 1));
@@ -298,10 +294,9 @@ proc _shops_paginate(@title, @list) {
     msg(colorize("&6Showing you random shops from &e@title"));
     @size = array_size(@list);
 
-    ### Loops a max of 8 times, or the size of the list, ignoring expired shop.
+    ## Loops a max of 8 times, or the size of the list, ignoring expired shop.
     @i = 0;
     while (@i < min(@size, 8)) {
-
         if (@size == 0) {
             break();
         }
@@ -319,7 +314,7 @@ proc _shops_paginate(@title, @list) {
     }
 }
 
-### Prints a single line for the pagination and likes_descending functions.
+## Prints a single line for the pagination and likes_descending functions.
 proc _shops_printline(@shop, @showRating=true) {
 
     @info = _shops_get_info(@shop);
@@ -328,14 +323,14 @@ proc _shops_printline(@shop, @showRating=true) {
     @rating = _shops_rating(@shop, @info);
     #@likes = array_size(@info['likes']);
 
-    ### Produce rating string
+    ## Produce rating string
     if (@showRating) {
         @ratingMsg = " &7&o(Rating: @rating)";
     } else {
         @ratingMsg = '';
     }
 
-    ### Display normally, or in red if shop is expired.
+    ## Display normally, or in red if shop is expired.
     if (@active) {
         msg(colorize("&5Shop @shop &dby &5@{owner}@{ratingMsg}"));
     } else {
@@ -347,7 +342,7 @@ proc _shops_expire_alert(@shop) {
     @info = _shops_get_info(@shop);
     @UUID = _UUID_altered( @info['owner'] );
 
-    ### Delete shop outright if less than 5 likes and expired more than 2 days ago, or just expired over 20 days ago
+    ## Delete shop outright if less than 5 likes and expired more than 2 days ago, or just expired over 20 days ago
     @likes = array_size(@info['likes']);
     @days = _shops_daysLeft(@shop);
     if ((@likes < 5 && @days < -2) || @days < -20) {

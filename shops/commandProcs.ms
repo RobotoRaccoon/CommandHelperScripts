@@ -5,7 +5,7 @@
 #                       #
 #########################
 
-### @RobotoRaccoon
+## @RobotoRaccoon
 
 include('shopsProcs.ms');
 
@@ -69,8 +69,8 @@ proc _shops_cmd_teleport(@shop, @silent=false) {
         _error("This shop does not have a location set...");
     }
 
-    _teleport_bannedblocks(@ploc); ### Check that the destination is not a death-trap.
-    sudo("/tpo @self"); ### Force an essentials /back position.
+    _teleport_bannedblocks(@ploc); ## Check that the destination is not a death-trap.
+    sudo("/tpo @self"); ## Force an essentials /back position.
     set_ploc(@self, @ploc);
     pfacing(@ploc['yaw'], @ploc['pitch']);
 
@@ -88,7 +88,7 @@ proc _shops_cmd_info(@shop) {
     @owner = _UUID_usernames_lastname(@info['owner']);
     @purchased = simple_date('MMMM dd, yyyy', @info['time']);
 
-    ### How many days left on their rent before someone else can claim it.
+    ## How many days left on their rent before someone else can claim it.
     @daysleft = _shops_daysLeft(@shop); #float
     @days = abs(ceil(@daysleft));
     @hours = abs(ceil(@daysleft*24));
@@ -106,8 +106,8 @@ proc _shops_cmd_info(@shop) {
         @status = "&a@hours hours left";
     }
 
-    ### Categories which this shop is a part of.
-    ### TODO also store locally in the array
+    ## Categories which this shop is a part of.
+    ## TODO also store locally in the array
     @cats = array();
     foreach (@cat in _shops_cat_list()) {
         if (array_contains_ic(_shops_cat_get(@cat), @shop)) {
@@ -124,7 +124,7 @@ proc _shops_cmd_info(@shop) {
     msg(colorize("&6Categories: &e@cats"));
     msg(colorize("&6Rating: &e@rating"));
 
-    ### Staff and owner only info below
+    ## Staff and owner only info below
     if (_UUID_player_get(player()) != @info['owner'] && !has_permission('ch_staff')) {
         die();
     }
@@ -135,7 +135,7 @@ proc _shops_cmd_info(@shop) {
     msg(colorize("&5Likes: &d@likes"));
     msg(colorize("&5Location: &d@coords"));
 
-    ### Staff only info below
+    ## Staff only info below
     if (!has_permission('ch_staff')) {
         die();
     }
@@ -179,22 +179,22 @@ proc _shops_cmd_buy(@shop) {
         _error('You cannot purchase a shop number above 9999.');
     }
 
-    ### Check they have enough dosh, and prep the 7 free days of upkeep.
+    ## Check they have enough dosh, and prep the 7 free days of upkeep.
     @cost = _shops_purchase();
     @freepay = _shops_perday() * 7;
     if (acc_balance(player()) < @cost) {
         _error("You need at least $@cost to buy a shop.");
     }
 
-    ### Clear from categories, in case it was an expired shop before purchase.
+    ## Clear from categories, in case it was an expired shop before purchase.
     foreach (_shops_cat_list(), @cat) {
         _shops_cat_off(@shop, @cat, true);
     }
 
-    ### Clear TP history, for reason above.
+    ## Clear TP history, for reason above.
     _shops_tphistory_clear(@shop);
 
-    ### Take away their cash, and set up their shop.
+    ## Take away their cash, and set up their shop.
     @UUID = _UUID_player_get(player());
     @info = _shops_generate_info(@UUID, ploc(), @freepay, time());
     acc_subtract(player(), @cost);
@@ -211,12 +211,12 @@ proc _shops_cmd_remove(@shop) {
 ## /shops list <cat|all>
 proc _shops_cmd_list(@cat) {
     if (@cat == 'all') {
-        ### All shops
+        ## All shops
         @list = _shops_allShops();
         _shops_paginate('All shops', @list);
     }
     else {
-        ### Specific category
+        ## Specific category
         @list = _shops_cat_get(@cat);
         _shops_paginate(@cat, @list);
     }
@@ -224,19 +224,18 @@ proc _shops_cmd_list(@cat) {
 
 ## /shop all [page]
 proc _shops_cmd_all(@page=1) {
-
-    ### Sort by rating
+    ## Sort by rating
     @list = _shops_getSorted();
 
-    ### Pagination section.
+    ## Pagination section
     @perpage = 8;
     @maxpage = ceil( array_size(@list) / @perpage );
-    if( !is_numeric(@page) || @page < 1 || @page > @maxpage )  {
+    if (!is_numeric(@page) || @page < 1 || @page > @maxpage) {
         @page = 1;
     }
 
     msg(colorize("&6Showing you &eAll shops &6sorted by rating"));
-    for(@i = 0, @i < @perpage, @i++) {
+    for (@i = 0, @i < @perpage, @i++) {
         try(
             @shop = @list[@i + @perpage * (@page - 1)];
             ,
@@ -248,51 +247,51 @@ proc _shops_cmd_all(@page=1) {
 }
 
 proc _shops_cmd_edit(@p2, @p3, @p4) {
-   @info = _shops_get_info(@p2);
+    @info = _shops_get_info(@p2);
     if (_UUID_player_get(player()) != @info['owner']) {
         _verify_staff('You do not own this shop.');
     }
 
     switch(@p3) {
-        case '':
-        case 'help':
-            msg(colorize(" &7===== &5/Shop edit @p2 &7====="));
-            msg(colorize("&5Cat &f> &dToggle categories for your shop."));
-            msg(colorize("&5Pay &f> &dAdd more money into your account."));
-            msg(colorize("&5TP &f> &dSet the teleport location."));
+    case '':
+    case 'help':
+        msg(colorize(" &7===== &5/Shop edit @p2 &7====="));
+        msg(colorize("&5Cat &f> &dToggle categories for your shop."));
+        msg(colorize("&5Pay &f> &dAdd more money into your account."));
+        msg(colorize("&5TP &f> &dSet the teleport location."));
 
-        case 'cat':
-        case 'category':
-            if (@p4 == '') {
-                _error("/shop edit @p2 @p3 <category>. Available categories:\n". _shops_cat_list());
-            }
-            _shops_cat_toggle(@p2, @p4);
+    case 'cat':
+    case 'category':
+        if (@p4 == '') {
+            _error("/shop edit @p2 @p3 <category>. Available categories:\n". _shops_cat_list());
+        }
+        _shops_cat_toggle(@p2, @p4);
 
-        case 'pay':
-            _no_console();
-            if (@p4 == '') {
-                _error("/shop edit @p2 @p3 <amount>");
-            }
-            _shops_addbalance(@p2, @p4);
+    case 'pay':
+        _no_console();
+        if (@p4 == '') {
+            _error("/shop edit @p2 @p3 <amount>");
+        }
+        _shops_addbalance(@p2, @p4);
 
-        case 'tp':
-        case 'teleport':
-        case 'warp':
-            _no_console();
-            _teleport_bannedblocks(ploc());
-            @info['ploc'] = ploc();
-            _shops_store_info(@p2, @info);
-            msg(colorize("&6Updated the teleport location for &eShop @{p2}&6..."));
+    case 'tp':
+    case 'teleport':
+    case 'warp':
+        _no_console();
+        _teleport_bannedblocks(ploc());
+        @info['ploc'] = ploc();
+        _shops_store_info(@p2, @info);
+        msg(colorize("&6Updated the teleport location for &eShop @{p2}&6..."));
 
-        case 'setowner':
-            _verify_staff();
-            if (@p4 == '') {
-                _error("/shop edit @p2 @p3 <newPlayer>");
-            }
-            @newOwner = _autocomplete_player(@p4);
-            @info['owner'] = _UUID_player_get(@newOwner);
-            _shops_store_info(@p2, @info);
-            msg(colorize("&6Set the new owner for &eShop @p2 &6to &e@newOwner"));
+    case 'setowner':
+        _verify_staff();
+        if (@p4 == '') {
+            _error("/shop edit @p2 @p3 <newPlayer>");
+        }
+        @newOwner = _autocomplete_player(@p4);
+        @info['owner'] = _UUID_player_get(@newOwner);
+        _shops_store_info(@p2, @info);
+        msg(colorize("&6Set the new owner for &eShop @p2 &6to &e@newOwner"));
     }
 }
 
