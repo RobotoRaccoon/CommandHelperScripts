@@ -56,5 +56,5 @@ add_recipe(
             enchants: array(array(etype: 'PROTECTION_FALL', elevel: 10)),
             meta: array(display: '§bBow of Flight', lore: array('§7I want to fly away...'))
         )
-    );
+    )
 );
