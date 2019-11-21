@@ -1,0 +1,92 @@
+#########################
+#                       #
+# THIS IS A MASTER FILE #
+#  ~/minecraft/master   #
+#                       #
+#########################
+
+## @RobotoRaccoon
+
+*:/rg reclaim [$] = call_alias("/region reclaim ". $);
+*:/region reclaim [$rg] [$] = >>>
+    _no_console();
+
+    @rg = $rg;
+    if (@rg == '') {
+        _error('Specify a region name');
+    }
+    else if (!sk_region_exists(@rg)) {
+        _error("No region found by the name of @rg");
+    }
+    else if (!array_contains(sk_region_owners(@rg, pworld())['players'], puuid())) {
+        _error('You do not own this region');
+    }
+
+    include('worldguard.ms');
+    @p1 = sk_pos1();
+    @p2 = sk_pos2();
+    _wg_assertSize(@p1, @p2);
+    _wg_assertBorders(@p1, @p2);
+    _wg_assertIntersection(@p1, @p2, @rg);
+
+    ## Passed pre-checks, manually update region
+    sk_region_update(@rg, array(@p1, @p2));
+    msg(colorize("&eYou have updated your region claim for: &6@rg"));
+<<<
+
+*:/rg claim [$] = call_alias('/region claim' $);
+*:/region claim [$] = >>>
+    _no_console();
+
+    include('worldguard.ms');
+    @p1 = sk_pos1();
+    @p2 = sk_pos2();
+    _wg_assertSize(@p1, @p2);
+    _wg_assertBorders(@p1, @p2);
+    _wg_assertLimit();
+
+    ## Passed pre-checks, do built-in checks and claim
+    run('/region claim' $);
+<<<
+
+*:/dickheadregions [$] = >>>
+x_new_thread('dhr.'.player(), closure() {
+    _verify_staff();
+    if (player() == '~console') {
+        @world = 'world';
+    } else {
+        @world = pworld();
+    }
+
+    @wb = get_world_border(@world);
+    @border = @wb['width'] / 2; # Assuming centered on block 0,0
+
+    @dickheads = associative_array();
+    @regions = sk_all_regions(@world);
+    foreach (@rg in @regions) {
+        @info = sk_region_info(@rg, @world);
+        @p1 = @info[0][0];
+        @p2 = @info[0][1];
+
+        if (abs(@p1[0]) > @border ||
+            abs(@p1[2]) > @border ||
+            abs(@p2[0]) > @border ||
+            abs(@p2[2]) > @border) {
+
+            @owners = @info[1]['players'];
+            if (array_size(@owners) == 1) {
+                @owner = @owners[0];
+                if (array_index_exists(@dickheads, @owner)) {
+                    @dickheads[@owner][] = @rg;
+                } else {
+                    @dickheads[@owner] = array(@rg);
+                }
+            }
+        }
+    }
+    foreach (@UUID : @rgs in @dickheads) {
+        @p = _UUID_usernames_lastname(@UUID);
+        msg(colorize("&5@p&d: @rgs"));
+    }
+});
+<<<
