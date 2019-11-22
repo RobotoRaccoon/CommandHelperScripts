@@ -30,6 +30,9 @@ Personal messaging, with socialspy abilities.
 #### Minesweeper
 Minesweeper in Minecraft! I really shouldn't have done this using CommandHelper, but here we are. It supports multi-sized arenas, multiple arenas, monetary payouts, leaderboards, and configurable preset modes.
 
+#### Promotion
+MCAU's promotion system
+
 #### Rap
 RAP sheets for players, listing all of their offences. Follows their UUID rather than their username. Does not currently track jails, but that's not difficult to implement if you feel the need.
 
@@ -45,6 +48,10 @@ Currently there is no way to specify different completions given the argument nu
 
 #### Watchdog
 Monitor that a database connection exists and is not returning garbage data. (Used on a Redis instance where a slave can be in READ-ONLY mode and break everything)
+
+#### WorldGuard
+WorldGuard fixes for region claiming. Only allow regions inside the world border, & up to a global maximum (not per-world).
+Create an alias to add the ability to re-claim regions without having to delete and re-create with the existing flags and members.
 
 ## Misc. Functions
 These may come one day, but for now they're just stubbed

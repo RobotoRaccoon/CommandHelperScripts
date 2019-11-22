@@ -1,0 +1,150 @@
+#########################
+#                       #
+# THIS IS A MASTER FILE #
+#  ~/minecraft/master   #
+#                       #
+#########################
+
+## @RobotoRaccoon
+*:/promote [$] = _error('Unknown command. Did you mean /promotion ?');
+*:/promotion [$p1] [$] = >>>
+    _no_console();
+    include('commands.ms');
+
+    @p1 = to_lower($p1);
+    @keyword = 'confirm';
+    if (@p1 == to_lower(@keyword)) {
+        _promotion_submit();
+    } else {
+        @rank = _rank(player())
+        @level = reg_replace('(donor|user)', '', @rank)
+
+        switch(@level) {
+        case '0':
+            msg(colorize('&5YOU\'RE ABOUT TO SEND A &cLEVEL 1 &5REQUEST TO STAFF! Please ensure you address the following before continuing;'))
+            msg(colorize('&c - It must only be built by you.'))
+            msg(colorize('&c - Be at the location of your promotion build.'))
+            msg(colorize('&c - Build is equal or better than /warp standard.'))
+
+        case '1':
+            msg(colorize('&5YOU\'RE ABOUT TO SEND A &cLEVEL 2 &5REQUEST TO STAFF! Please ensure you address the following before continuing;'))
+            msg(colorize('&c - It must only be built by you.'))
+            msg(colorize('&c - Be at the location of your promotion build.'))
+            msg(colorize('&c - Build is extremely awe inspiring and impressive, and it is completed to a very high standard.'))
+            msg(colorize('&c - Double check that your build is one of the best on the server.'))
+
+        case '2':
+            msg(colorize('&5YOU\'RE ABOUT TO SEND A &cLEVEL 3 &5REQUEST TO STAFF! Please ensure you address the following before continuing;'))
+            msg(colorize('&c - It must only be built by you.'))
+            msg(colorize('&c - Be at the location of your promotion build.'))
+            msg(colorize('&c - Build is extremely awe inspiring and impressive, and it is completed to a very high standard.'))
+            msg(colorize('&c - Triple check that your build is one of the very best on the server. Seriously.'))
+
+        case '3':
+            _error('You are already at the highest rank.')
+
+        default:
+            _error('You are not a user or a donor, and thus cannot get promoted.')
+        }
+
+        msg(colorize('&c - Build is built only by you, no help!'))
+        msg(colorize("&5If all of this applies to your build, type &6/promotion @keyword"))
+    }
+<<<
+
+*:/req [$p1] [$p2] [$] = >>>
+    include('commands.ms');
+
+    @p1 = to_lower($p1);
+    @p2 = to_lower($p2);
+
+    switch(@p1) {
+    case '':
+    case 'help':
+        ### P2 : Page number ###
+        _req_cmd_help(@p2);
+
+    case 'list':
+        ### P2 : Specific rank ###
+        _req_cmd_list(@p2);
+
+    case 'tp':
+    case 'teleport':
+    case 'warp':
+        ### P2 : Player name ###
+        _verify_janitor();
+        if (@p2 == '') {
+            _error("/req @p1 <player>");
+        }
+        _req_cmd_teleport(@p2);
+
+    case 'denies':
+        _verify_janitor();
+        if (@p2 == '') {
+            _error("/req @p1 <player>");
+        }
+        _req_cmd_denies(@p2);
+
+    case 'info':
+        ### P2 : Player name ###
+        _verify_janitor()
+        if (@p2 == '') {
+            _error("/req @p1 <player>")
+        }
+        _req_cmd_info(@p2);
+
+    case 'approve':
+    case 'accept':
+        ### P2 : Player name ###
+        ### $  : Comment     ###
+        _verify_janitor();
+        if (@p2 == '') {
+            _error("/req @p1 <player>");
+        }
+        _req_cmd_approve(@p2, $);
+
+    case 'deny':
+        ### P2 : Player name ###
+        ### $  : Comment     ###
+        _verify_janitor();
+        if (@p2 == '') {
+            _error("/req @p1 <player>");
+        }
+        _req_cmd_deny(@p2, $);
+
+    case 'cancel':
+        ### P2 : Player name ###
+        _verify_staff();
+        if( @p2 == '' ) {
+            _error("/req @p1 <player>");
+        }
+        _req_cmd_cancel(@p2);
+
+    case 'ban':
+        ### P2 : Player name ###
+        _verify_staff();
+        if( @p2 == '' ) {
+            _error("/req @p1 <player>");
+        }
+        _req_cmd_ban(@p2);
+
+    case 'unban':
+        ### P2 : Player name ###
+        _verify_staff();
+        if( @p2 == '' ) {
+            _error("/req @p1 <player>");
+        }
+        _req_cmd_unban(@p2);
+
+    case 'banlist':
+        ### P2 : Page number ###
+        _req_cmd_banlist(@p2);
+
+    #case 'resetall':
+    #    ## Hidden command to reset counts and cooldowns (e.g. on new maps)
+    #    _req_cmd_resetall();
+
+    default:
+        _error('Unknown command. Please try /req help');
+    }
+<<<
