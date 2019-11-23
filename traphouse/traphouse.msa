@@ -1,0 +1,175 @@
+#########################
+#                       #
+# THIS IS A MASTER FILE #
+#  ~/minecraft/master   #
+#                       #
+#########################
+
+## @RobotoRaccoon
+
+*:/wild [$] = call_alias('/warprandom ' . $);
+*:/warprandom [$PlayerOpt] = >>>
+    _no_console();
+
+    if (pworld() != 'world') {
+        _error('Random warps are only available in the Overworld.');
+    }
+
+    ## WHO TO CHUCK AROUND
+    @player = player();
+    if (has_permission(@player,'ch_staff') && $PlayerOpt) {
+        @player = _autocomplete_player($PlayerOpt, true);
+    }
+
+    @UUID = _UUID_altered(@player);
+    @nonce = '1.13';
+    #if (@player != 'RobotoRaccoon' && get_value("warprandom.@UUID") == @nonce) {
+    if (get_value("warprandom.@UUID") == @nonce) {
+        # Already has the nonce, run normally
+        runas(@player, '/invportal random');
+        die();
+    }
+    store_value("warprandom.@UUID", @nonce);
+
+    ## Hasn't run /warprandom with this nonce value yet, send them to a traphouse if one exists
+
+    include('warplib.ms');
+    @traps = array_normalize(_WL_values('traphouse'));
+
+    if (array_size(@traps) > 0) {
+        @pos = array_rand(@traps, 1, false)[0];
+
+        @yaw = @pos['yaw'];
+        @pitch = @pos['pitch'];
+        set_ploc(@player, @pos);
+        pfacing(@player, @yaw, @pitch);
+    } else {
+        runas(@player, '/invportal random');
+    }
+<<<
+
+## Store trap house locations for the first /warp of a map (as seen above)
+*:/traphouse [$] = >>>
+    _verify_janitor();
+
+    include('includes.ms');
+    include('warplib.ms');
+    @ns = 'traphouse';
+
+    @args = split(' ', $);
+    if (array_size(@args) > 0) {
+        @cmd = array_remove(@args, 0);
+    } else {
+        @cmd = 'help';
+    }
+
+    @player = player();
+    switch(@cmd) {
+        case '':
+        case 'help':
+            ## All commands go here if they are to show up in the help command.
+            @commands = array(
+                    '&5List &f> &dList traphouses',
+                    '&5Goto &f> &dTeleport to the traphouse',
+                    '&5Info &f> &dShow info about a traphouse',
+                    '&5Add &f> &dAdd a traphouse region',
+                    '&5Delete &f> &dRemove the traphouse',
+                    '&5Update &f> &dUpdate the traphouse teleport'
+            );
+            if (array_size(@args) < 1) {
+                @page = 1;
+            } else {
+                @page = @args[0];
+            }
+            _page_vertical('Options', 'traphouse help', @commands, @page);
+
+        case 'add':
+            _no_console();
+            _verify_staff();
+            if (array_size(@args) < 2) {
+                _error('/traphouse add <name> <region-name>');
+            }
+            @name = @args[0];
+            if (_WL_exists(@ns, @name)) {
+                _error("This traphouse (@name) already exists...");
+            }
+
+            @rg = @args[1];
+            @world = pworld();
+            @rgs = sk_all_regions(@world);
+
+            if (!array_contains(@rgs, @rg)) {
+                _error("This region (@rg) does not exist...");
+            }
+
+            store_value("@ns.info.@name", array(name: @name, rg: @rg));
+            run("/rg flag -w @world @rg use allow");
+            run("/rg flag -w @world @rg block-break allow");
+            run("/rg flag -w @world @rg build allow");
+            _WL_store(@ns, @name, ploc());
+            msg(colorize("&6Created traphouse &e@name &6with region &e@rg"));
+
+        case 'goto':
+            _no_console();
+            if (array_size(@args) < 1) {
+                _error('/traphouse goto <name>');
+            }
+            @name = @args[0];
+            if (!_WL_exists(@ns, @name)) {
+                _error("This traphouse (@name) does not exist...");
+            }
+            _WL_teleport(@ns, @name);
+            msg(colorize("&6Teleported to traphouse &e@name"));
+
+        case 'delete':
+            _verify_staff();
+            if (array_size(@args) < 1) {
+                _error('/traphouse delete <name>');
+            }
+            @name = @args[0];
+            if (!_WL_exists(@ns, @name)) {
+                _error("This traphouse (@name) does not exist...");
+            }
+
+            clear_value("@ns.info.@name");
+            _WL_remove(@ns, @name);
+            msg(colorize("&6Removed traphouse &e@name"));
+
+        case 'update':
+            _no_console();
+            _verify_staff();
+            if (array_size(@args) < 1) {
+                _error('/traphouse update <name>');
+            }
+            @name = @args[0];
+            if (!_WL_exists(@ns, @name)) {
+                _error("This traphouse (@name) does not exist...");
+            }
+            _WL_store(@ns, @name, ploc());
+            msg(colorize("&6Updated the warp location for traphouse &e@name"));
+
+        case 'list':
+            if (array_size(@args) < 1) {
+                @page = 1;
+            } else {
+                @page = @args[0];
+            }
+            @locs = _WL_keyNames(@ns);
+            _paginate('Traphouses', @locs, @page);
+
+        case 'info':
+            if (array_size(@args) < 1) {
+                _error('/traphouse info <name>');
+            }
+            @name = @args[0];
+            if (!_WL_exists(@ns, @name)) {
+                _error("This traphouse (@name) does not exist...");
+            }
+            @info = get_value("@ns.info.@name");
+            @rg = @info['rg'];
+            msg(colorize("&6Traphouse &e@name &6belongs to region &e@rg"));
+
+        default:
+            _error('/traphouse help');
+    }
+<<<
